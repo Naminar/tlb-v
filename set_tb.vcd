@@ -1,5 +1,5 @@
 $date
-	Sun Apr 28 19:35:07 2024
+	Sun Apr 28 23:06:07 2024
 $end
 $version
 	Icarus Verilog
@@ -8,228 +8,402 @@ $timescale
 	1s
 $end
 $scope module set_tb $end
-$var reg 1 ! clk $end
-$scope module sets[0] $end
+$var wire 64 ! in_addr [63:0] $end
+$var wire 12 " in_pcid [11:0] $end
+$var wire 64 # o_addr [63:0] $end
+$var wire 8 $ hit [7:0] $end
+$var reg 1 % clk $end
+$scope module c $end
+$var wire 1 % clk $end
+$var wire 64 & in_addr [63:0] $end
+$var wire 12 ' in_pcid [11:0] $end
+$var wire 64 ( o_addr [63:0] $end
+$var wire 49 ) tag [48:0] $end
+$var wire 3 * set [2:0] $end
+$var wire 12 + local_addr [11:0] $end
+$var wire 8 , hit [7:0] $end
+$var reg 8 - enable [7:0] $end
+$var reg 64 . prev_addr [63:0] $end
+$scope module _set_0 $end
+$var wire 1 % clk $end
+$var wire 1 / enable $end
+$var wire 12 0 pcid [11:0] $end
+$var wire 49 1 tag [48:0] $end
+$var wire 3 2 this_set [2:0] $end
+$var wire 64 3 comp_addr [63:0] $end
+$var reg 1 4 hit $end
 $scope begin my_init $end
-$var integer 32 " i [31:0] $end
+$var integer 32 5 i [31:0] $end
 $upscope $end
 $upscope $end
-$scope module sets[1] $end
+$scope module _set_1 $end
+$var wire 1 % clk $end
+$var wire 1 6 enable $end
+$var wire 12 7 pcid [11:0] $end
+$var wire 49 8 tag [48:0] $end
+$var wire 3 9 this_set [2:0] $end
+$var wire 64 : comp_addr [63:0] $end
+$var reg 1 ; hit $end
 $scope begin my_init $end
-$var integer 32 # i [31:0] $end
+$var integer 32 < i [31:0] $end
 $upscope $end
 $upscope $end
-$scope module sets[2] $end
+$scope module _set_2 $end
+$var wire 1 % clk $end
+$var wire 1 = enable $end
+$var wire 12 > pcid [11:0] $end
+$var wire 49 ? tag [48:0] $end
+$var wire 3 @ this_set [2:0] $end
+$var wire 64 A comp_addr [63:0] $end
+$var reg 1 B hit $end
 $scope begin my_init $end
-$var integer 32 $ i [31:0] $end
+$var integer 32 C i [31:0] $end
+$upscope $end
+$upscope $end
+$scope module _set_3 $end
+$var wire 1 % clk $end
+$var wire 1 D enable $end
+$var wire 12 E pcid [11:0] $end
+$var wire 49 F tag [48:0] $end
+$var wire 3 G this_set [2:0] $end
+$var wire 64 H comp_addr [63:0] $end
+$var reg 1 I hit $end
+$scope begin my_init $end
+$var integer 32 J i [31:0] $end
+$upscope $end
+$upscope $end
+$scope module _set_4 $end
+$var wire 1 % clk $end
+$var wire 1 K enable $end
+$var wire 12 L pcid [11:0] $end
+$var wire 49 M tag [48:0] $end
+$var wire 3 N this_set [2:0] $end
+$var wire 64 O comp_addr [63:0] $end
+$var reg 1 P hit $end
+$scope begin my_init $end
+$var integer 32 Q i [31:0] $end
+$upscope $end
+$upscope $end
+$scope module _set_5 $end
+$var wire 1 % clk $end
+$var wire 1 R enable $end
+$var wire 12 S pcid [11:0] $end
+$var wire 49 T tag [48:0] $end
+$var wire 3 U this_set [2:0] $end
+$var wire 64 V comp_addr [63:0] $end
+$var reg 1 W hit $end
+$scope begin my_init $end
+$var integer 32 X i [31:0] $end
+$upscope $end
+$upscope $end
+$scope module _set_6 $end
+$var wire 1 % clk $end
+$var wire 1 Y enable $end
+$var wire 12 Z pcid [11:0] $end
+$var wire 49 [ tag [48:0] $end
+$var wire 3 \ this_set [2:0] $end
+$var wire 64 ] comp_addr [63:0] $end
+$var reg 1 ^ hit $end
+$scope begin my_init $end
+$var integer 32 _ i [31:0] $end
+$upscope $end
+$upscope $end
+$scope module _set_7 $end
+$var wire 1 % clk $end
+$var wire 1 ` enable $end
+$var wire 12 a pcid [11:0] $end
+$var wire 49 b tag [48:0] $end
+$var wire 3 c this_set [2:0] $end
+$var wire 64 d comp_addr [63:0] $end
+$var reg 1 e hit $end
+$scope begin my_init $end
+$var integer 32 f i [31:0] $end
+$upscope $end
 $upscope $end
 $upscope $end
 $upscope $end
 $enddefinitions $end
 #0
 $dumpvars
-b1000 $
-b1000 #
-b1000 "
-0!
+b1000 f
+0e
+b1111111111111111111111111111111111111111111111111111000000000000 d
+b111 c
+b1111111111111111111111111111111111111111111111111 b
+b0 a
+0`
+b1000 _
+0^
+b1111111111111111111111111111111111111111111111111111000000000000 ]
+b111 \
+b1111111111111111111111111111111111111111111111111 [
+b0 Z
+0Y
+b1000 X
+0W
+b1111111111111111111111111111111111111111111111111111000000000000 V
+b111 U
+b1111111111111111111111111111111111111111111111111 T
+b0 S
+0R
+b1000 Q
+0P
+b1111111111111111111111111111111111111111111111111111000000000000 O
+b111 N
+b1111111111111111111111111111111111111111111111111 M
+b0 L
+0K
+b1000 J
+0I
+b1111111111111111111111111111111111111111111111111111000000000000 H
+b111 G
+b1111111111111111111111111111111111111111111111111 F
+b0 E
+0D
+b1000 C
+0B
+b1111111111111111111111111111111111111111111111111111000000000000 A
+b111 @
+b1111111111111111111111111111111111111111111111111 ?
+b0 >
+0=
+b1000 <
+0;
+b1111111111111111111111111111111111111111111111111111000000000000 :
+b111 9
+b1111111111111111111111111111111111111111111111111 8
+b0 7
+06
+b1000 5
+04
+b1111111111111111111111111111111111111111111111111111000000000000 3
+b111 2
+b1111111111111111111111111111111111111111111111111 1
+b0 0
+0/
+b0 .
+b0 -
+b0 ,
+b111111111111 +
+b111 *
+b1111111111111111111111111111111111111111111111111 )
+bz (
+b0 '
+b1111111111111111111111111111111111111111111111111111111111111111 &
+0%
+b0 $
+bz #
+b0 "
+b1111111111111111111111111111111111111111111111111111111111111111 !
 $end
 #1
-1!
+b1111111111111111111111111111111111111111111111111111111111111111 .
+1/
+b1 -
+1%
 #2
-0!
+b1 $
+b1 ,
+14
+0%
 #3
-1!
+0/
+b0 -
+1%
 #4
-0!
+b0 $
+b0 ,
+04
+0%
 #5
-1!
+1%
 #6
-0!
+0%
 #7
-1!
+1%
 #8
-0!
+0%
 #9
-1!
+1%
 #10
-0!
+0%
 #11
-1!
+1%
 #12
-0!
+0%
 #13
-1!
+1%
 #14
-0!
+0%
 #15
-1!
+1%
 #16
-0!
+0%
 #17
-1!
+1%
 #18
-0!
+0%
 #19
-1!
+1%
 #20
-0!
+0%
 #21
-1!
+1%
 #22
-0!
+0%
 #23
-1!
+1%
 #24
-0!
+0%
 #25
-1!
+1%
 #26
-0!
+0%
 #27
-1!
+1%
 #28
-0!
+0%
 #29
-1!
+1%
 #30
-0!
+0%
 #31
-1!
+1%
 #32
-0!
+0%
 #33
-1!
+1%
 #34
-0!
+0%
 #35
-1!
+1%
 #36
-0!
+0%
 #37
-1!
+1%
 #38
-0!
+0%
 #39
-1!
+1%
 #40
-0!
+0%
 #41
-1!
+1%
 #42
-0!
+0%
 #43
-1!
+1%
 #44
-0!
+0%
 #45
-1!
+1%
 #46
-0!
+0%
 #47
-1!
+1%
 #48
-0!
+0%
 #49
-1!
+1%
 #50
-0!
+0%
 #51
-1!
+1%
 #52
-0!
+0%
 #53
-1!
+1%
 #54
-0!
+0%
 #55
-1!
+1%
 #56
-0!
+0%
 #57
-1!
+1%
 #58
-0!
+0%
 #59
-1!
+1%
 #60
-0!
+0%
 #61
-1!
+1%
 #62
-0!
+0%
 #63
-1!
+1%
 #64
-0!
+0%
 #65
-1!
+1%
 #66
-0!
+0%
 #67
-1!
+1%
 #68
-0!
+0%
 #69
-1!
+1%
 #70
-0!
+0%
 #71
-1!
+1%
 #72
-0!
+0%
 #73
-1!
+1%
 #74
-0!
+0%
 #75
-1!
+1%
 #76
-0!
+0%
 #77
-1!
+1%
 #78
-0!
+0%
 #79
-1!
+1%
 #80
-0!
+0%
 #81
-1!
+1%
 #82
-0!
+0%
 #83
-1!
+1%
 #84
-0!
+0%
 #85
-1!
+1%
 #86
-0!
+0%
 #87
-1!
+1%
 #88
-0!
+0%
 #89
-1!
+1%
 #90
-0!
+0%
 #91
-1!
+1%
 #92
-0!
+0%
 #93
-1!
+1%
 #94
-0!
+0%
 #95
-1!
+1%
 #96
-0!
+0%
 #97
-1!
+1%
 #98
-0!
+0%
 #99
-1!
+1%
 #100
-0!
+0%
