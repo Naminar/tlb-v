@@ -11,6 +11,7 @@ module set
     input [$clog2(set_num)-1:0] this_set,
     input [pcid_b-1:0]pcid,
     output reg hit
+    // output reg phys_addr
 //     output reg [addr-page+pcid-1:0] block
 );
     reg [addr-page+pcid_b-1:0] va [way-1:0]; //[$clog2(way)-1:0];
@@ -20,7 +21,7 @@ module set
     wire [addr-1:0] comp_addr = {tag, this_set, pcid};
     // hit <= 1'b0; 
 
-    initial begin: my_init
+    initial begin: set_init
         integer  i;
         hit = 0;
         for (i = 0; i < way; i = i + 1) begin
@@ -164,10 +165,11 @@ reg [set_num-1:0] enable;
 wire [set_num-1:0] hit;
 
 // genvar ind;
-// generate
-//     for (ind = 0; ind < set_num; ind = ind + 1)
-//         set _set_(clk, enable[ind], tag, set, in_pcid, hit[ind]);
-// endgenerate
+// // generate: name
+//     for (ind = 0; ind < set_num; ind = ind + 1) begin: tlb_set
+//         set tlb_set (clk, enable[ind], tag, set, in_pcid, hit[ind]);
+//     end
+// // endgenerate
 
 set _set_0(clk, enable[0], tag, set, in_pcid, hit[0]);
 set _set_1(clk, enable[1], tag, set, in_pcid, hit[1]);
@@ -177,15 +179,7 @@ set _set_3(clk, enable[3], tag, set, in_pcid, hit[3]);
 set _set_4(clk, enable[4], tag, set, in_pcid, hit[4]);
 set _set_5(clk, enable[5], tag, set, in_pcid, hit[5]);
 set _set_6(clk, enable[6], tag, set, in_pcid, hit[6]);
-set _set_7(clk, enable[7], tag, set, in_pcid, hit[7]);
-// set s0(clk, enable[0]);
-// set s1(clk, enable[0]);
-// set s2();
-// set s3();
-// set s4();
-// set s5();
-// set s6();
-// set s7();    
+set _set_7(clk, enable[7], tag, set, in_pcid, hit[7]);    
 
 initial begin
     enable = 0;
@@ -203,16 +197,13 @@ always @(posedge clk) begin
             4: begin enable = 0; enable[4] = 1'b1; end
             5: begin enable = 0; enable[5] = 1'b1; end
             6: begin enable = 0; enable[6] = 1'b1; end
-            default: begin enable = 0; enable[0] = 1'b1; end
+            default: begin enable = 0; enable[7] = 1'b1; end
         endcase
         prev_addr <= in_addr;
     end else begin 
         enable = 0;
     end
 end
-
-
-
 endmodule
 // module cache 
 // #(
