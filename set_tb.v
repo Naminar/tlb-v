@@ -13,7 +13,7 @@ module set_tb;
     initial begin
         $dumpfile("set_tb.vcd");
         $dumpvars(0,set_tb);
-        $monitor("%t | clk = %d | out = %d", $time, clk, c._set_0.hit);
+        $monitor("%t | clk = %d | out = %d", $time, clk, c._set_0.va[7]);
         #100 $finish;
     end
 

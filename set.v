@@ -13,9 +13,9 @@ module set
     output reg hit
 //     output reg [addr-page+pcid-1:0] block
 );
-    reg [addr-page+pcid_b-1:0] va [$clog2(way)-1:0];
-    reg [addr-page+pcid_b-1:0] pa [$clog2(way)-1:0];
-    reg [$clog2(way)-1:0] plru;
+    reg [addr-page+pcid_b-1:0] va [way-1:0]; //[$clog2(way)-1:0];
+    reg [addr-page+pcid_b-1:0] pa [way-1:0]; //[$clog2(way)-1:0];
+    reg [way-2:0] plru;
 
     wire [addr-1:0] comp_addr = {tag, this_set, pcid};
     // hit <= 1'b0; 
@@ -26,24 +26,103 @@ module set
         for (i = 0; i < way; i = i + 1) begin
             va[i] = 0;
         end
+        for (i = 0; i < way-1; i = i + 1) begin
+            plru[i] = 0;
+        end
     end 
     
     integer ind;
-    always @(negedge clk && enable) begin // TODO (posedge clk and enable)
+    integer bit = 0;
+    always @(negedge clk) begin // TODO (posedge clk and enable)
+        // hit
+        // if hit -> rebuild plru tree
+        if (enable) begin
         hit = 1'b1;
         if (va[0] == comp_addr) begin
-        // rebuild plru tree 
-        // end else if (va[1] == comp_addr) begin
-        // end else if (va[2] == comp_addr) begin
-        // end else if (va[3] == comp_addr) begin
-        // end else if (va[4] == comp_addr) begin
-        // end else if (va[5] == comp_addr) begin
-        // end else if (va[6] == comp_addr) begin
-        // end else if (va[7] == comp_addr) begin 
+            plru[0] = 1'b0;
+            plru[1] = 1'b0;
+            plru[3] = 1'b0;
+        end else if (va[1] == comp_addr) begin
+            plru[0] = 1'b0;
+            plru[1] = 1'b0;
+            plru[3] = 1'b1;
+        end else if (va[2] == comp_addr) begin
+            plru[0] = 1'b0;
+            plru[1] = 1'b1;
+            plru[4] = 1'b0;
+        end else if (va[3] == comp_addr) begin
+            plru[0] = 1'b0;
+            plru[1] = 1'b1;
+            plru[4] = 1'b1;
+        end else if (va[4] == comp_addr) begin
+            plru[0] = 1'b1;
+            plru[2] = 1'b0;
+            plru[5] = 1'b0;
+        end else if (va[5] == comp_addr) begin
+            plru[0] = 1'b1;
+            plru[2] = 1'b0;
+            plru[5] = 1'b1;
+        end else if (va[6] == comp_addr) begin
+            plru[0] = 1'b1;
+            plru[2] = 1'b1;
+            plru[6] = 1'b0;
+        end else if (va[7] == comp_addr) begin
+            plru[0] = 1'b1;
+            plru[2] = 1'b1;
+            plru[6] = 1'b1; 
         end else begin 
             // miss
             hit = 1'b0;
-            va[0] <= comp_addr;
+            // invers plru tree and find cell to put data
+            // for (ind=0;ind<3;ind=ind+1) begin
+            //     if (ind != 2) begin
+            //         if(plru[bit]) begin
+            //             plru[bit] = !plru[bit]; // проверить !!!!
+            //             bit <= bit*2 + 2;
+            //         end else begin
+            //             plru[bit] = !plru[bit];
+            //             bit <= bit*2 + 1;
+            //         end
+            //     end else
+            //         plru[bit] <= !plru[bit];
+            // end
+            if (plru[0]) begin
+                plru[0] = !plru[0];
+                if (plru[1]) begin
+                    plru[1] = !plru[1];
+                    plru[3] = !plru[3];
+                    bit=3;
+                end else begin
+                    plru[1] = !plru[1];
+                    plru[4] = !plru[4];
+                    bit=4;
+                end
+            end else begin
+                plru[0] = !plru[0];
+                if (plru[2]) begin
+                    plru[2] = !plru[2];
+                    plru[5] = !plru[5];
+                    bit=5;
+                end else begin
+                    plru[2] = !plru[2];
+                    plru[6] = !plru[6];
+                    bit=6;
+                end
+            end
+
+            // put data to the cell
+            case (bit)
+                3: va[bit-3+plru[bit]] <= comp_addr; 
+                4: va[bit-2+plru[bit]] <= comp_addr; 
+                5: va[bit-1+plru[bit]] <= comp_addr; 
+                6: va[bit+plru[bit]]   <= comp_addr;
+                default: va[0] <= comp_addr; 
+            endcase
+
+
+            // va[0] <= comp_addr;
+
+        end
         end
     end
 
