@@ -1,213 +1,62 @@
-// module set 
-// #(  parameter addr=64, //bit 
-//     parameter page=12, //bit
-//     parameter pcid_b=12, //bit
-//     parameter way=8, // number
-//     parameter set_num=8
-// )  
-// (   input clk,
-//     input enable, 
-//     input [addr-1-page-$clog2(set_num):0] tag, 
-//     input [pcid_b-1:0] pcid,
-//     input [addr-page-1:0] pull_phys_add, // pulling address dut to miss
-//     output reg hit,
-//     output reg [addr-page-1:0] push_phys_addr, // translated result of va
-//     output reg clr
-// );
-//     reg [addr-page+pcid_b-$clog2(set_num)-1:0] va [way-1:0]; //[$clog2(way)-1:0];
-//     reg [addr-page-1:0] pa [way-1:0]; //[$clog2(way)-1:0];
-//     reg [way-2:0] plru;
-//     reg mode; 
-//     // concatinate and tag note inside cache
-//     wire [addr-page-1+pcid_b-$clog2(set_num):0] comp_addr = {tag, pcid}; 
-//     // hit <= 1'b0; 
-//     initial begin: set_init
-//         integer  i;
-//         hit = 0;
-//         clr = 0;
-//         mode = 0;
-//         for (i = 0; i < way; i = i + 1) begin
-//             va[i] = 0;
-//         end
-//         for (i = 0; i < way-1; i = i + 1) begin
-//             plru[i] = 0;
-//         end
-//     end 
-    
-//     integer ind;
-//     integer bit = 0;
-//     always @(negedge clk) begin
-//         // hit
-//         // if hit -> rebuild plru tree
-//         // clr = 0;
-//         clr <= mode;
-//         if (!enable) begin
-//             clr <= 0;
-//             mode <= 0;
-//             hit <= 0;
-//         end
-        
-//         if (enable && !mode) begin
-//             hit <= 1'b1;
-//             clr <= 1;
-//             if (va[0] == comp_addr) begin
-//                 plru[0] = 1'b0;
-//                 plru[1] = 1'b0;
-//                 plru[3] = 1'b0;
-//                 push_phys_addr <= pa[0];
-//                 // enable <= 0;
-//             end else if (va[1] == comp_addr) begin
-//                 plru[0] = 1'b0;
-//                 plru[1] = 1'b0;
-//                 plru[3] = 1'b1;
-//                 push_phys_addr <= pa[1];
-//                 // enable <= 0;
-//             end else if (va[2] == comp_addr) begin
-//                 plru[0] = 1'b0;
-//                 plru[1] = 1'b1;
-//                 plru[4] = 1'b0;
-//                 push_phys_addr <= pa[2];
-//                 // enable <= 0;
-//             end else if (va[3] == comp_addr) begin
-//                 plru[0] = 1'b0;
-//                 plru[1] = 1'b1;
-//                 plru[4] = 1'b1;
-//                 push_phys_addr <= pa[3];
-//                 // enable <= 0;
-//             end else if (va[4] == comp_addr) begin
-//                 plru[0] = 1'b1;
-//                 plru[2] = 1'b0;
-//                 plru[5] = 1'b0;
-//                 push_phys_addr <= pa[4];
-//                 // enable <= 0;
-//             end else if (va[5] == comp_addr) begin
-//                 plru[0] = 1'b1;
-//                 plru[2] = 1'b0;
-//                 plru[5] = 1'b1;
-//                 push_phys_addr <= pa[5];
-//                 // enable <= 0;
-//             end else if (va[6] == comp_addr) begin
-//                 plru[0] = 1'b1;
-//                 plru[2] = 1'b1;
-//                 plru[6] = 1'b0;
-//                 push_phys_addr <= pa[6];
-//                 // enable <= 0;
-//             end else if (va[7] == comp_addr) begin
-//                 plru[0] = 1'b1;
-//                 plru[2] = 1'b1;
-//                 plru[6] = 1'b1; 
-//                 push_phys_addr <= pa[7];
-//                 // enable <= 0;
-//             end else begin
-//                 hit <= 1'b0;
-//                 mode <= 1'b1;
-//                 clr <= 0;
-//             end
-//         end 
-//         // miss
-//         if (enable && mode) begin 
-//             // miss
-//             // clr = 1;
-//             clr <= mode;
-//             hit <= 1'b0;
-//             mode <= 0;
-//             // invers plru tree and find cell to put data
-//             if (plru[0]) begin
-//                 plru[0] = !plru[0];
-//                 if (plru[1]) begin
-//                     plru[1] = !plru[1];
-//                     plru[3] = !plru[3];
-//                     bit=3;
-//                 end else begin
-//                     plru[1] = !plru[1];
-//                     plru[4] = !plru[4];
-//                     bit=4;
-//                 end
-//             end else begin
-//                 plru[0] = !plru[0];
-//                 if (plru[2]) begin
-//                     plru[2] = !plru[2];
-//                     plru[5] = !plru[5];
-//                     bit=5;
-//                 end else begin
-//                     plru[2] = !plru[2];
-//                     plru[6] = !plru[6];
-//                     bit=6;
-//                 end
-//             end
+/********************************************************************
+                            PLRU tree
+*********************************************************************
 
-//             // put data to the cell
-//             case (bit)
-//                 3: begin 
-//                     va[bit-3+plru[bit]] <= comp_addr; 
-//                     pa[bit-3+plru[bit]] <= pull_phys_add;
-//                 end
-//                 4: begin
-//                     va[bit-2+plru[bit]] <= comp_addr; 
-//                     pa[bit-2+plru[bit]] <= pull_phys_add;
-//                 end
-//                 5: begin 
-//                     va[bit-1+plru[bit]] <= comp_addr; 
-//                     pa[bit-1+plru[bit]] <= pull_phys_add;
-//                 end
-//                 6: begin 
-//                     va[bit+plru[bit]] <= comp_addr;
-//                     pa[bit+plru[bit]] <= pull_phys_add;
-//                 end
-//                 default: begin 
-//                     va[0] <= comp_addr;
-//                     pa[0] <= pull_phys_add; 
-//                 end
-//             endcase
-//         end
-//     end
+      0b  
+    /    \
+  1b      2b
+ /  \    /  \
+3b   4b 5b   6b
 
-//     // always @(negedge clk)
-//     //     hit = 1'b0;
+if nb is 1 it direct to the right, else(0) to the left. 
 
-// endmodule
+In memory representation:
+|0b|1b|2b|3b|4b|5b|6b|
+
+To go to the next bit in tree representation use ind*2 + 1 or 2, 1 - to the left
+and 2 - to the right.
+
+For each hit or new insertion in cache there's a need to rebuild plru-tree. 
+*/ 
 
 module cache 
 #(
-    parameter SADDR=64, 
-    parameter SPAGE=12, 
-    parameter NSET=8, 
-    parameter SPCID=12, 
-    parameter NWAY=8 
+    parameter SADDR=64, // size of address
+    parameter SPAGE=12, // size of page
+    parameter NSET=8,   // set number
+    parameter SPCID=12, // size of pcid
+    parameter NWAY=8    // way number
 )
 (
     input clk,
-    input  [SADDR-1:0] va,
-    input  [SADDR-1:0] pa,
-    input  [SPCID-1:0] pcid,
+    // input  shutdown,
+    input  [SADDR-1:0] va, // virtual address
+    input  [SADDR-1:0] pa, // physical address
+    input  [SPCID-1:0] pcid, // process-context identifier
     output reg [SADDR-1:0] ta, // translated address
     output reg hit,
     output reg miss
-    // output [NSET-1:0]hit
 );
 
-// reg [SADDR-1:0]  prev_addr;
-
-wire [SPAGE-1:0]        local_addr      = va[SPAGE-1:0];
-wire [$clog2(NSET)-1:0] set             = va[SPAGE+$clog2(NSET)-1:SPAGE];
-wire [SADDR-1-SPAGE-$clog2(NSET):0] tag = va[SADDR-1:SPAGE+$clog2(NSET)];
-
-// wire [SADDR-SPAGE-1:0] transl_pa [NSET-1:0];
-// wire [SADDR-SPAGE-1:0] insrt_pa = pa[SADDR-1:SPAGE]; 
+wire [SPAGE-1:0]                    local_addr      = va[SPAGE-1:0];
+wire [$clog2(NSET)-1:0]             set             = va[SPAGE+$clog2(NSET)-1:SPAGE];
+wire [SADDR-1-SPAGE-$clog2(NSET):0] tag             = va[SADDR-1:SPAGE+$clog2(NSET)];
 
 parameter state_waiting = 2'b00;
-parameter state_req = 2'b01;
-parameter state_miss = 2'b10;
+parameter state_req     = 2'b01;
+parameter state_miss    = 2'b10;
 
 reg [1:0] state = state_waiting;
-// reg hit = 0;
-// reg miss = 0;
 
 reg [NWAY-2:0] plru [NSET-1:0] [NWAY-1:0];
 
-reg [SADDR-$clog2(NWAY)-1:0]    tag_way0  [NSET-1:0]; //va
-reg [SPCID-1:0]                 pcid_way0 [NSET-1:0]; //va
-reg [SADDR-SPAGE-1:0]           pa_way0   [NSET-1:0]; 
+/********************************************************************
+                            TAG-PCID-PHYSICAL ADDRESS
+********************************************************************/
+
+reg [SADDR-$clog2(NWAY)-1:0]    tag_way0  [NSET-1:0]; // belongs to a va
+reg [SPCID-1:0]                 pcid_way0 [NSET-1:0]; // belongs to a va
+reg [SADDR-SPAGE-1:0]           pa_way0   [NSET-1:0]; // pa without local address
 
 reg [SADDR-$clog2(NWAY)-1:0]    tag_way1  [NSET-1:0];
 reg [SPCID-1:0]                 pcid_way1 [NSET-1:0];
@@ -236,6 +85,7 @@ reg [SADDR-SPAGE-1:0]           pa_way6   [NSET-1:0];
 reg [SADDR-$clog2(NWAY)-1:0]    tag_way7  [NSET-1:0];
 reg [SPCID-1:0]                 pcid_way7 [NSET-1:0];
 reg [SADDR-SPAGE-1:0]           pa_way7   [NSET-1:0];
+
 
 initial begin: init
     integer  i;
@@ -275,8 +125,6 @@ initial begin: init
 
 end     
 
-
-
 reg [SADDR-1:0] prev_addr = 0;
 
 always @(posedge clk) begin
@@ -285,6 +133,10 @@ always @(posedge clk) begin
        prev_addr <= va;
     end
 end
+
+/********************************************************************
+                             STATE MACHINE
+********************************************************************/
 
 always @(posedge clk) begin
     
@@ -358,7 +210,6 @@ always @(posedge clk) begin
                 
             end else begin
                 hit <= 1'b0;
-                // miss <= 1'b1;
                 state <= state_miss;
             end
         // end state_req
@@ -382,7 +233,6 @@ always @(posedge clk) begin
                         tag_way0[set]  <= tag;
                         pcid_way0[set] <= pcid;
                     end
-                    // bit=3;
                 end else begin
                     plru[set][1] = !plru[set][1];
                     plru[set][4] = !plru[set][4];
@@ -397,7 +247,6 @@ always @(posedge clk) begin
                         tag_way2[set]  <= tag;
                         pcid_way2[set] <= pcid;
                     end
-                    // bit=4;
                 end
             end else begin
                 plru[set][0] = !plru[set][0];
@@ -415,7 +264,6 @@ always @(posedge clk) begin
                         tag_way4[set]  <= tag;
                         pcid_way4[set] <= pcid;
                     end
-                    // bit=5;
                 end else begin
                     plru[set][2] = !plru[set][2];
                     plru[set][6] = !plru[set][6];
@@ -430,58 +278,14 @@ always @(posedge clk) begin
                         tag_way6[set]  <= tag;
                         pcid_way6[set] <= pcid;
                     end
-                    // bit=6;
                 end
             end
-            // ta[SADDR-1:SPAGE] <= pa[SADDR-1:SPAGE];
+            // end plru tree
+
             ta[SADDR-1:0] <= {pa[SADDR-1:SPAGE], local_addr};
-            // ta[SPAGE-1:0] <= local_addr;
-            // miss <= 1'b0;
             state <= state_waiting;
-            // put data to the cell
-            // case (bit)
-            //     3: begin 
-            //         va[set][bit-3+plru[bit]] <= comp_addr; 
-            //         pa[set][bit-3+plru[bit]] <= pull_phys_add;
-            //     end
-            //     4: begin
-            //         va[set][bit-2+plru[bit]] <= comp_addr; 
-            //         pa[set][bit-2+plru[bit]] <= pull_phys_add;
-            //     end
-            //     5: begin 
-            //         va[set][bit-1+plru[bit]] <= comp_addr; 
-            //         pa[set][bit-1+plru[bit]] <= pull_phys_add;
-            //     end
-            //     6: begin 
-            //         va[set][bit+plru[bit]] <= comp_addr;
-            //         pa[set][bit+plru[bit]] <= pull_phys_add;
-            //     end
-            //     default: begin 
-            //         va[set][0] <= comp_addr;
-            //         pa[set][0] <= pull_phys_add; 
-            //     end
-            // endcase
-        // end state_miss
         end
         default: ;
     endcase
 end
 endmodule
-
-
-// genvar ind;
-// // // generate: name
-// //     for (ind = 0; ind < set_num; ind = ind + 1) begin: tlb_set
-// //         set tlb_set (clk, enable[ind], tag, set, in_pcid, hit[ind]);
-// //     end
-// // // endgenerate
-
-// set _set_0(clk, enable[0], tag, in_pcid, insrt_pa, hit[0], transl_pa[0], clr_set[0]);
-// set _set_1(clk, enable[1], tag, in_pcid, insrt_pa, hit[1], transl_pa[1], clr_set[1]);
-// set _set_2(clk, enable[2], tag, in_pcid, insrt_pa, hit[2], transl_pa[2], clr_set[2]);
-// set _set_3(clk, enable[3], tag, in_pcid, insrt_pa, hit[3], transl_pa[3], clr_set[3]);
-
-// set _set_4(clk, enable[4], tag, in_pcid, insrt_pa, hit[4], transl_pa[4], clr_set[4]);
-// set _set_5(clk, enable[5], tag, in_pcid, insrt_pa, hit[5], transl_pa[5], clr_set[5]);
-// set _set_6(clk, enable[6], tag, in_pcid, insrt_pa, hit[6], transl_pa[6], clr_set[6]);
-// set _set_7(clk, enable[7], tag, in_pcid, insrt_pa, hit[7], transl_pa[7], clr_set[7]);
