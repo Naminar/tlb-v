@@ -10,17 +10,17 @@ module set
     input [addr-1-page-$clog2(set_num):0] tag, 
     input [$clog2(set_num)-1:0] this_set,
     input [pcid_b-1:0]pcid,
-    output reg hit
-    // output reg phys_addr
-//     output reg [addr-page+pcid-1:0] block
+    input mode, // 0 translate, 1 insert
+    input [addr-page-1:0] pull_phys_add, // pulling address dut to miss
+    output reg hit,
+    output reg push_phys_addr // translated result of va
 );
     reg [addr-page+pcid_b-1:0] va [way-1:0]; //[$clog2(way)-1:0];
     reg [addr-page+pcid_b-1:0] pa [way-1:0]; //[$clog2(way)-1:0];
     reg [way-2:0] plru;
-
-    wire [addr-1:0] comp_addr = {tag, this_set, pcid};
+    // concatinate and tag note inside cache
+    wire [addr-1:0] comp_addr = {tag, this_set, pcid}; 
     // hit <= 1'b0; 
-
     initial begin: set_init
         integer  i;
         hit = 0;
@@ -75,18 +75,6 @@ module set
             // miss
             hit = 1'b0;
             // invers plru tree and find cell to put data
-            // for (ind=0;ind<3;ind=ind+1) begin
-            //     if (ind != 2) begin
-            //         if(plru[bit]) begin
-            //             plru[bit] = !plru[bit]; // проверить !!!!
-            //             bit <= bit*2 + 2;
-            //         end else begin
-            //             plru[bit] = !plru[bit];
-            //             bit <= bit*2 + 1;
-            //         end
-            //     end else
-            //         plru[bit] <= !plru[bit];
-            // end
             if (plru[0]) begin
                 plru[0] = !plru[0];
                 if (plru[1]) begin
@@ -119,23 +107,12 @@ module set
                 6: va[bit+plru[bit]]   <= comp_addr;
                 default: va[0] <= comp_addr; 
             endcase
-
-
-            // va[0] <= comp_addr;
-
         end
         end
     end
 
     always @(negedge clk)
         hit = 1'b0;
-
-    // initial begin
-    //     $dumpfile("set_tb.vcd");
-    //     $dumpvars(1,set);
-    //     // $monitor("%t | clk = %d | out = %d", $time, clk, c[0].va[0]);
-    //     #100 $finish;
-    // end
 
 endmodule
 
@@ -149,21 +126,24 @@ module cache
 )
 (
     input clk,
-    input  [addr-1:0] in_addr,
+    input  [addr-1:0] va,
+    input  [addr-1:0] pa,
     input  [pcid-1:0] in_pcid,
     output [addr-1:0] o_addr,
     output [way-1:0]hit
 );
 
 reg [addr-1:0]  prev_addr;
-wire [page-1:0] phys_addr;
 
-wire [page-1:0] local_addr = in_addr[page-1:0];
-wire [$clog2(set_num)-1:0] set = in_addr[page+$clog2(set_num)-1:page];
-wire [addr-1-page-$clog2(set_num):0] tag = in_addr[addr-1:page+$clog2(set_num)];
+wire [page-1:0] local_addr = va[page-1:0];
+wire [$clog2(set_num)-1:0] set = va[page+$clog2(set_num)-1:page];
+wire [addr-1-page-$clog2(set_num):0] tag = va[addr-1:page+$clog2(set_num)];
 reg [set_num-1:0] enable;
 wire [set_num-1:0] hit;
-
+reg mode;
+wire [page-1:0] transl_pa;
+wire [addr-page-1:0] insrt_pa = pa[addr-1:page];
+assign o_addr[page-1:0] = pa[page-1:0]; 
 // genvar ind;
 // // generate: name
 //     for (ind = 0; ind < set_num; ind = ind + 1) begin: tlb_set
@@ -171,15 +151,15 @@ wire [set_num-1:0] hit;
 //     end
 // // endgenerate
 
-set _set_0(clk, enable[0], tag, set, in_pcid, hit[0]);
-set _set_1(clk, enable[1], tag, set, in_pcid, hit[1]);
-set _set_2(clk, enable[2], tag, set, in_pcid, hit[2]);
-set _set_3(clk, enable[3], tag, set, in_pcid, hit[3]);
+set _set_0(clk, enable[0], tag, set, in_pcid, mode, insrt_pa, hit[0], transl_pa);
+set _set_1(clk, enable[1], tag, set, in_pcid, mode, insrt_pa, hit[1], transl_pa);
+set _set_2(clk, enable[2], tag, set, in_pcid, mode, insrt_pa, hit[2], transl_pa);
+set _set_3(clk, enable[3], tag, set, in_pcid, mode, insrt_pa, hit[3], transl_pa);
 
-set _set_4(clk, enable[4], tag, set, in_pcid, hit[4]);
-set _set_5(clk, enable[5], tag, set, in_pcid, hit[5]);
-set _set_6(clk, enable[6], tag, set, in_pcid, hit[6]);
-set _set_7(clk, enable[7], tag, set, in_pcid, hit[7]);    
+set _set_4(clk, enable[4], tag, set, in_pcid, mode, insrt_pa, hit[4], transl_pa);
+set _set_5(clk, enable[5], tag, set, in_pcid, mode, insrt_pa, hit[5], transl_pa);
+set _set_6(clk, enable[6], tag, set, in_pcid, mode, insrt_pa, hit[6], transl_pa);
+set _set_7(clk, enable[7], tag, set, in_pcid, mode, insrt_pa, hit[7], transl_pa);    
 
 initial begin
     enable = 0;
@@ -188,7 +168,7 @@ end
 
 always @(posedge clk) begin
     // enable = 0;
-    if (prev_addr != in_addr) begin
+    if (prev_addr != va) begin
         case (set)
             0: begin enable = 0; enable[0] = 1'b1; end
             1: begin enable = 0; enable[1] = 1'b1; end 
@@ -199,66 +179,9 @@ always @(posedge clk) begin
             6: begin enable = 0; enable[6] = 1'b1; end
             default: begin enable = 0; enable[7] = 1'b1; end
         endcase
-        prev_addr <= in_addr;
+        prev_addr <= va;
     end else begin 
         enable = 0;
     end
 end
 endmodule
-// module cache 
-// #(
-//     parameter addr=64, //bit 
-//     parameter page=12, //bit
-//     parameter set_num=8, //number
-//     parameter pcid=12, //bit
-//     parameter way=8 // number
-// )
-// (
-//     input clk,
-//     input  [addr-1:0] in_addr,
-//     input  [pcid-1:0] in_pcid,
-//     output [addr-1:0] o_addr
-// );
-//     reg [addr-1:0] prev_addr;
-//     reg [page-1:0] phys_addr;
-//     reg [$clog2(set_num):0] index;
-//     reg [addr-page+pcid-1:0] sets [$clog2(set_num)-1:0] [$clog2(way)-1:0];
-//     reg [$clog2(way)-1:0]    plru [$clog2(set_num)-1:0] [$clog2(way)-1:0];
-
-
-//     integer i_set;
-//     integer i_block;
-//     initial begin: initialize
-//         prev_addr = 0;
-//         for (i_set = 0; i_set < set_num; i_set = i_set + 1) begin
-//             for (i_block = 0; i_block < way; i_block = i_block +1) begin
-//                 sets[i_set][i_block] = 0; // null addresses inside each cache block
-//                 plru[i_set][i_block] = 0;
-//             end
-//         end
-//     end  
-
-//     reg set_line, inside_phys_addr, tag, comp_addr;
-
-//     always @(posedge clk) begin
-//         if (in_addr != prev_addr) begin
-//             prev_addr = in_addr;
-//             inside_phys_addr = in_addr[page-1:0];
-//             set_line = in_addr[page+$clog2(set_num)-1:page];
-//             tag = in_addr[addr-1:page+$clog2(set_num)];
-//             comp_addr = {tag, set_line, in_pcid};
-//             // sets[set_line][0] = 64'b1;
-//             for (i_block = 0; i_block < way; i_block = i_block +1) begin
-//                 if (sets[set_line][i_block] == comp_addr) begin
-//                 // hit in block with i index
-//                 i_block = way;
-
-//                 end else begin 
-//                 // miss in set with set_line index
-
-//                 end
-//             end
-//         end
-//     end
-
-// endmodule
