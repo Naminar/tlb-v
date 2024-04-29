@@ -1,5 +1,5 @@
 $date
-	Mon Apr 29 16:38:21 2024
+	Mon Apr 29 18:04:05 2024
 $end
 $version
 	Icarus Verilog
@@ -26,151 +26,142 @@ $var wire 52 - insrt_pa [51:0] $end
 $var wire 8 . hit [7:0] $end
 $var wire 8 / clr_set [7:0] $end
 $var reg 8 0 enable [7:0] $end
-$var reg 1 1 mode $end
-$var reg 64 2 o_addr [63:0] $end
-$var reg 64 3 prev_addr [63:0] $end
+$var reg 64 1 o_addr [63:0] $end
+$var reg 64 2 prev_addr [63:0] $end
 $scope module _set_0 $end
-$var wire 1 1 X_X $end
 $var wire 1 # clk $end
-$var wire 1 4 enable $end
-$var wire 12 5 pcid [11:0] $end
-$var wire 52 6 pull_phys_add [51:0] $end
-$var wire 49 7 tag [48:0] $end
-$var wire 64 8 comp_addr [63:0] $end
-$var reg 1 9 clr $end
-$var reg 1 : hit $end
-$var reg 1 ; mode $end
-$var reg 7 < plru [6:0] $end
-$var reg 52 = push_phys_addr [51:0] $end
-$var integer 32 > bit [31:0] $end
+$var wire 1 3 enable $end
+$var wire 12 4 pcid [11:0] $end
+$var wire 52 5 pull_phys_add [51:0] $end
+$var wire 49 6 tag [48:0] $end
+$var wire 64 7 comp_addr [63:0] $end
+$var reg 1 8 clr $end
+$var reg 1 9 hit $end
+$var reg 1 : mode $end
+$var reg 7 ; plru [6:0] $end
+$var reg 52 < push_phys_addr [51:0] $end
+$var integer 32 = bit [31:0] $end
 $scope begin set_init $end
-$var integer 32 ? i [31:0] $end
+$var integer 32 > i [31:0] $end
 $upscope $end
 $upscope $end
 $scope module _set_1 $end
-$var wire 1 1 X_X $end
 $var wire 1 # clk $end
-$var wire 1 @ enable $end
-$var wire 12 A pcid [11:0] $end
-$var wire 52 B pull_phys_add [51:0] $end
-$var wire 49 C tag [48:0] $end
-$var wire 64 D comp_addr [63:0] $end
-$var reg 1 E clr $end
-$var reg 1 F hit $end
-$var reg 1 G mode $end
-$var reg 7 H plru [6:0] $end
-$var reg 52 I push_phys_addr [51:0] $end
-$var integer 32 J bit [31:0] $end
+$var wire 1 ? enable $end
+$var wire 12 @ pcid [11:0] $end
+$var wire 52 A pull_phys_add [51:0] $end
+$var wire 49 B tag [48:0] $end
+$var wire 64 C comp_addr [63:0] $end
+$var reg 1 D clr $end
+$var reg 1 E hit $end
+$var reg 1 F mode $end
+$var reg 7 G plru [6:0] $end
+$var reg 52 H push_phys_addr [51:0] $end
+$var integer 32 I bit [31:0] $end
 $scope begin set_init $end
-$var integer 32 K i [31:0] $end
+$var integer 32 J i [31:0] $end
 $upscope $end
 $upscope $end
 $scope module _set_2 $end
-$var wire 1 1 X_X $end
 $var wire 1 # clk $end
-$var wire 1 L enable $end
-$var wire 12 M pcid [11:0] $end
-$var wire 52 N pull_phys_add [51:0] $end
-$var wire 49 O tag [48:0] $end
-$var wire 64 P comp_addr [63:0] $end
-$var reg 1 Q clr $end
-$var reg 1 R hit $end
-$var reg 1 S mode $end
-$var reg 7 T plru [6:0] $end
-$var reg 52 U push_phys_addr [51:0] $end
-$var integer 32 V bit [31:0] $end
+$var wire 1 K enable $end
+$var wire 12 L pcid [11:0] $end
+$var wire 52 M pull_phys_add [51:0] $end
+$var wire 49 N tag [48:0] $end
+$var wire 64 O comp_addr [63:0] $end
+$var reg 1 P clr $end
+$var reg 1 Q hit $end
+$var reg 1 R mode $end
+$var reg 7 S plru [6:0] $end
+$var reg 52 T push_phys_addr [51:0] $end
+$var integer 32 U bit [31:0] $end
 $scope begin set_init $end
-$var integer 32 W i [31:0] $end
+$var integer 32 V i [31:0] $end
 $upscope $end
 $upscope $end
 $scope module _set_3 $end
-$var wire 1 1 X_X $end
 $var wire 1 # clk $end
-$var wire 1 X enable $end
-$var wire 12 Y pcid [11:0] $end
-$var wire 52 Z pull_phys_add [51:0] $end
-$var wire 49 [ tag [48:0] $end
-$var wire 64 \ comp_addr [63:0] $end
-$var reg 1 ] clr $end
-$var reg 1 ^ hit $end
-$var reg 1 _ mode $end
-$var reg 7 ` plru [6:0] $end
-$var reg 52 a push_phys_addr [51:0] $end
-$var integer 32 b bit [31:0] $end
+$var wire 1 W enable $end
+$var wire 12 X pcid [11:0] $end
+$var wire 52 Y pull_phys_add [51:0] $end
+$var wire 49 Z tag [48:0] $end
+$var wire 64 [ comp_addr [63:0] $end
+$var reg 1 \ clr $end
+$var reg 1 ] hit $end
+$var reg 1 ^ mode $end
+$var reg 7 _ plru [6:0] $end
+$var reg 52 ` push_phys_addr [51:0] $end
+$var integer 32 a bit [31:0] $end
 $scope begin set_init $end
-$var integer 32 c i [31:0] $end
+$var integer 32 b i [31:0] $end
 $upscope $end
 $upscope $end
 $scope module _set_4 $end
-$var wire 1 1 X_X $end
 $var wire 1 # clk $end
-$var wire 1 d enable $end
-$var wire 12 e pcid [11:0] $end
-$var wire 52 f pull_phys_add [51:0] $end
-$var wire 49 g tag [48:0] $end
-$var wire 64 h comp_addr [63:0] $end
-$var reg 1 i clr $end
-$var reg 1 j hit $end
-$var reg 1 k mode $end
-$var reg 7 l plru [6:0] $end
-$var reg 52 m push_phys_addr [51:0] $end
-$var integer 32 n bit [31:0] $end
+$var wire 1 c enable $end
+$var wire 12 d pcid [11:0] $end
+$var wire 52 e pull_phys_add [51:0] $end
+$var wire 49 f tag [48:0] $end
+$var wire 64 g comp_addr [63:0] $end
+$var reg 1 h clr $end
+$var reg 1 i hit $end
+$var reg 1 j mode $end
+$var reg 7 k plru [6:0] $end
+$var reg 52 l push_phys_addr [51:0] $end
+$var integer 32 m bit [31:0] $end
 $scope begin set_init $end
-$var integer 32 o i [31:0] $end
+$var integer 32 n i [31:0] $end
 $upscope $end
 $upscope $end
 $scope module _set_5 $end
-$var wire 1 1 X_X $end
 $var wire 1 # clk $end
-$var wire 1 p enable $end
-$var wire 12 q pcid [11:0] $end
-$var wire 52 r pull_phys_add [51:0] $end
-$var wire 49 s tag [48:0] $end
-$var wire 64 t comp_addr [63:0] $end
-$var reg 1 u clr $end
-$var reg 1 v hit $end
-$var reg 1 w mode $end
-$var reg 7 x plru [6:0] $end
-$var reg 52 y push_phys_addr [51:0] $end
-$var integer 32 z bit [31:0] $end
+$var wire 1 o enable $end
+$var wire 12 p pcid [11:0] $end
+$var wire 52 q pull_phys_add [51:0] $end
+$var wire 49 r tag [48:0] $end
+$var wire 64 s comp_addr [63:0] $end
+$var reg 1 t clr $end
+$var reg 1 u hit $end
+$var reg 1 v mode $end
+$var reg 7 w plru [6:0] $end
+$var reg 52 x push_phys_addr [51:0] $end
+$var integer 32 y bit [31:0] $end
 $scope begin set_init $end
-$var integer 32 { i [31:0] $end
+$var integer 32 z i [31:0] $end
 $upscope $end
 $upscope $end
 $scope module _set_6 $end
-$var wire 1 1 X_X $end
 $var wire 1 # clk $end
-$var wire 1 | enable $end
-$var wire 12 } pcid [11:0] $end
-$var wire 52 ~ pull_phys_add [51:0] $end
-$var wire 49 !" tag [48:0] $end
-$var wire 64 "" comp_addr [63:0] $end
-$var reg 1 #" clr $end
-$var reg 1 $" hit $end
-$var reg 1 %" mode $end
-$var reg 7 &" plru [6:0] $end
-$var reg 52 '" push_phys_addr [51:0] $end
-$var integer 32 (" bit [31:0] $end
+$var wire 1 { enable $end
+$var wire 12 | pcid [11:0] $end
+$var wire 52 } pull_phys_add [51:0] $end
+$var wire 49 ~ tag [48:0] $end
+$var wire 64 !" comp_addr [63:0] $end
+$var reg 1 "" clr $end
+$var reg 1 #" hit $end
+$var reg 1 $" mode $end
+$var reg 7 %" plru [6:0] $end
+$var reg 52 &" push_phys_addr [51:0] $end
+$var integer 32 '" bit [31:0] $end
 $scope begin set_init $end
-$var integer 32 )" i [31:0] $end
+$var integer 32 (" i [31:0] $end
 $upscope $end
 $upscope $end
 $scope module _set_7 $end
-$var wire 1 1 X_X $end
 $var wire 1 # clk $end
-$var wire 1 *" enable $end
-$var wire 12 +" pcid [11:0] $end
-$var wire 52 ," pull_phys_add [51:0] $end
-$var wire 49 -" tag [48:0] $end
-$var wire 64 ." comp_addr [63:0] $end
-$var reg 1 /" clr $end
-$var reg 1 0" hit $end
-$var reg 1 1" mode $end
-$var reg 7 2" plru [6:0] $end
-$var reg 52 3" push_phys_addr [51:0] $end
-$var integer 32 4" bit [31:0] $end
+$var wire 1 )" enable $end
+$var wire 12 *" pcid [11:0] $end
+$var wire 52 +" pull_phys_add [51:0] $end
+$var wire 49 ," tag [48:0] $end
+$var wire 64 -" comp_addr [63:0] $end
+$var reg 1 ." clr $end
+$var reg 1 /" hit $end
+$var reg 1 0" mode $end
+$var reg 7 1" plru [6:0] $end
+$var reg 52 2" push_phys_addr [51:0] $end
+$var integer 32 3" bit [31:0] $end
 $scope begin set_init $end
-$var integer 32 5" i [31:0] $end
+$var integer 32 4" i [31:0] $end
 $upscope $end
 $upscope $end
 $upscope $end
@@ -178,105 +169,104 @@ $upscope $end
 $enddefinitions $end
 #0
 $dumpvars
-b111 5"
-b0 4"
-bx 3"
-b0 2"
-01"
+b111 4"
+b0 3"
+bx 2"
+b0 1"
 00"
 0/"
-b1111111111111111111111111111111111111111111111111000000000000 ."
-b1111111111111111111111111111111111111111111111111 -"
-b0 ,"
+0."
+b1111111111111111111111111111111111111111111111111000000000000 -"
+b1111111111111111111111111111111111111111111111111 ,"
 b0 +"
-0*"
-b111 )"
-b0 ("
-bx '"
-b0 &"
-0%"
+b0 *"
+0)"
+b111 ("
+b0 '"
+bx &"
+b0 %"
 0$"
 0#"
-b1111111111111111111111111111111111111111111111111000000000000 ""
-b1111111111111111111111111111111111111111111111111 !"
-b0 ~
+0""
+b1111111111111111111111111111111111111111111111111000000000000 !"
+b1111111111111111111111111111111111111111111111111 ~
 b0 }
-0|
-b111 {
-b0 z
-bx y
-b0 x
-0w
+b0 |
+0{
+b111 z
+b0 y
+bx x
+b0 w
 0v
 0u
-b1111111111111111111111111111111111111111111111111000000000000 t
-b1111111111111111111111111111111111111111111111111 s
-b0 r
+0t
+b1111111111111111111111111111111111111111111111111000000000000 s
+b1111111111111111111111111111111111111111111111111 r
 b0 q
-0p
-b111 o
-b0 n
-bx m
-b0 l
-0k
+b0 p
+0o
+b111 n
+b0 m
+bx l
+b0 k
 0j
 0i
-b1111111111111111111111111111111111111111111111111000000000000 h
-b1111111111111111111111111111111111111111111111111 g
-b0 f
+0h
+b1111111111111111111111111111111111111111111111111000000000000 g
+b1111111111111111111111111111111111111111111111111 f
 b0 e
-0d
-b111 c
-b0 b
-bx a
-b0 `
-0_
+b0 d
+0c
+b111 b
+b0 a
+bx `
+b0 _
 0^
 0]
-b1111111111111111111111111111111111111111111111111000000000000 \
-b1111111111111111111111111111111111111111111111111 [
-b0 Z
+0\
+b1111111111111111111111111111111111111111111111111000000000000 [
+b1111111111111111111111111111111111111111111111111 Z
 b0 Y
-0X
-b111 W
-b0 V
-bx U
-b0 T
-0S
+b0 X
+0W
+b111 V
+b0 U
+bx T
+b0 S
 0R
 0Q
-b1111111111111111111111111111111111111111111111111000000000000 P
-b1111111111111111111111111111111111111111111111111 O
-b0 N
+0P
+b1111111111111111111111111111111111111111111111111000000000000 O
+b1111111111111111111111111111111111111111111111111 N
 b0 M
-0L
-b111 K
-b0 J
-bx I
-b0 H
-0G
+b0 L
+0K
+b111 J
+b0 I
+bx H
+b0 G
 0F
 0E
-b1111111111111111111111111111111111111111111111111000000000000 D
-b1111111111111111111111111111111111111111111111111 C
-b0 B
+0D
+b1111111111111111111111111111111111111111111111111000000000000 C
+b1111111111111111111111111111111111111111111111111 B
 b0 A
-0@
-b111 ?
-b0 >
-bx =
-b0 <
-0;
+b0 @
+0?
+b111 >
+b0 =
+bx <
+b0 ;
 0:
 09
-b1111111111111111111111111111111111111111111111111000000000000 8
-b1111111111111111111111111111111111111111111111111 7
-b0 6
+08
+b1111111111111111111111111111111111111111111111111000000000000 7
+b1111111111111111111111111111111111111111111111111 6
 b0 5
-04
-b0 3
-bx 2
-01
+b0 4
+03
+b0 2
+bx 1
 b0 0
 b0 /
 b0 .
@@ -295,36 +285,36 @@ b0 "
 bx !
 $end
 #1
-b1111111111111111111111111111111111111111111111111111111111110001 3
-1*"
+b1111111111111111111111111111111111111111111111111111111111110001 2
+1)"
 b10000000 0
 1#
 #2
-11"
+10"
 b0 /
-0/"
+0."
 b0 "
 b0 .
-00"
+0/"
 0#
 #3
 1#
 #4
-01"
+00"
 b10000000 /
-1/"
-b110 4"
-b1000101 2"
+1."
+b110 3"
+b1000101 1"
 0#
 #5
 bx111111110001 !
-bx111111110001 2
-0*"
+bx111111110001 1
+0)"
 b0 0
 1#
 #6
 b0 /
-0/"
+0."
 0#
 #7
 1#
@@ -335,15 +325,6 @@ b0 /
 #10
 b0 ,
 b0 +
-b0 8
-b0 D
-b0 P
-b0 \
-b0 h
-b0 t
-b0 ""
-b0 ."
-b0 *
 b0 7
 b0 C
 b0 O
@@ -352,33 +333,42 @@ b0 g
 b0 s
 b0 !"
 b0 -"
+b0 *
+b0 6
+b0 B
+b0 N
+b0 Z
+b0 f
+b0 r
+b0 ~
+b0 ,"
 0#
 b0 &
 b0 )
 #11
-b0 3
-14
+b0 2
+13
 b1 0
 1#
 #12
 b1 /
-19
+18
 b1 "
 b1 .
-1:
+19
 0#
 #13
 bx000000000000 !
-bx000000000000 2
-04
+bx000000000000 1
+03
 b0 0
 1#
 #14
 b0 "
 b0 .
-0:
-b0 /
 09
+b0 /
+08
 0#
 #15
 1#
@@ -393,51 +383,51 @@ b0 /
 #20
 b111111110010 ,
 b111 +
-b1111111111111111111111111111111111111111111111111000000000000 8
-b1111111111111111111111111111111111111111111111111000000000000 D
-b1111111111111111111111111111111111111111111111111000000000000 P
-b1111111111111111111111111111111111111111111111111000000000000 \
-b1111111111111111111111111111111111111111111111111000000000000 h
-b1111111111111111111111111111111111111111111111111000000000000 t
-b1111111111111111111111111111111111111111111111111000000000000 ""
-b1111111111111111111111111111111111111111111111111000000000000 ."
+b1111111111111111111111111111111111111111111111111000000000000 7
+b1111111111111111111111111111111111111111111111111000000000000 C
+b1111111111111111111111111111111111111111111111111000000000000 O
+b1111111111111111111111111111111111111111111111111000000000000 [
+b1111111111111111111111111111111111111111111111111000000000000 g
+b1111111111111111111111111111111111111111111111111000000000000 s
+b1111111111111111111111111111111111111111111111111000000000000 !"
+b1111111111111111111111111111111111111111111111111000000000000 -"
 b1111111111111111111111111111111111111111111111111 *
-b1111111111111111111111111111111111111111111111111 7
-b1111111111111111111111111111111111111111111111111 C
-b1111111111111111111111111111111111111111111111111 O
-b1111111111111111111111111111111111111111111111111 [
-b1111111111111111111111111111111111111111111111111 g
-b1111111111111111111111111111111111111111111111111 s
-b1111111111111111111111111111111111111111111111111 !"
-b1111111111111111111111111111111111111111111111111 -"
+b1111111111111111111111111111111111111111111111111 6
+b1111111111111111111111111111111111111111111111111 B
+b1111111111111111111111111111111111111111111111111 N
+b1111111111111111111111111111111111111111111111111 Z
+b1111111111111111111111111111111111111111111111111 f
+b1111111111111111111111111111111111111111111111111 r
+b1111111111111111111111111111111111111111111111111 ~
+b1111111111111111111111111111111111111111111111111 ,"
 0#
 b1111111111111111111111111111111111111111111111111111111111110010 &
 b1111111111111111111111111111111111111111111111111111111111110010 )
 #21
-b1111111111111111111111111111111111111111111111111111111111110010 3
-1*"
+b1111111111111111111111111111111111111111111111111111111111110010 2
+1)"
 b10000000 0
 1#
 #22
-b0 3"
+b0 2"
 b10000000 /
-1/"
+1."
 b10000000 "
 b10000000 .
-10"
+1/"
 0#
 #23
 b111111110010 !
-b111111110010 2
-0*"
+b111111110010 1
+0)"
 b0 0
 1#
 #24
 b0 "
 b0 .
-00"
-b0 /
 0/"
+b0 /
+0."
 0#
 #25
 1#

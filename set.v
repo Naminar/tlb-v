@@ -9,7 +9,6 @@ module set
     input enable, 
     input [addr-1-page-$clog2(set_num):0] tag, 
     input [pcid_b-1:0] pcid,
-    input X_X, // 0 translate, 1 insert
     input [addr-page-1:0] pull_phys_add, // pulling address dut to miss
     output reg hit,
     output reg [addr-page-1:0] push_phys_addr, // translated result of va
@@ -20,7 +19,7 @@ module set
     reg [way-2:0] plru;
     reg mode; 
     // concatinate and tag note inside cache
-    wire [addr-1:0] comp_addr = {tag, pcid}; 
+    wire [addr-page-1+pcid_b-$clog2(set_num):0] comp_addr = {tag, pcid}; 
     // hit <= 1'b0; 
     initial begin: set_init
         integer  i;
@@ -193,7 +192,6 @@ wire [addr-1-page-$clog2(set_num):0] tag = va[addr-1:page+$clog2(set_num)];
 reg [set_num-1:0] enable;
 // wire [set_num-1:0] hit;
 wire [set_num-1:0] clr_set;
-reg mode;
 wire [addr-page-1:0] transl_pa [set_num-1:0];
 wire [addr-page-1:0] insrt_pa = pa[addr-1:page]; 
 // genvar ind;
@@ -203,20 +201,19 @@ wire [addr-page-1:0] insrt_pa = pa[addr-1:page];
 //     end
 // // endgenerate
 
-set _set_0(clk, enable[0], tag, in_pcid, mode, insrt_pa, hit[0], transl_pa[0], clr_set[0]);
-set _set_1(clk, enable[1], tag, in_pcid, mode, insrt_pa, hit[1], transl_pa[1], clr_set[1]);
-set _set_2(clk, enable[2], tag, in_pcid, mode, insrt_pa, hit[2], transl_pa[2], clr_set[2]);
-set _set_3(clk, enable[3], tag, in_pcid, mode, insrt_pa, hit[3], transl_pa[3], clr_set[3]);
+set _set_0(clk, enable[0], tag, in_pcid, insrt_pa, hit[0], transl_pa[0], clr_set[0]);
+set _set_1(clk, enable[1], tag, in_pcid, insrt_pa, hit[1], transl_pa[1], clr_set[1]);
+set _set_2(clk, enable[2], tag, in_pcid, insrt_pa, hit[2], transl_pa[2], clr_set[2]);
+set _set_3(clk, enable[3], tag, in_pcid, insrt_pa, hit[3], transl_pa[3], clr_set[3]);
 
-set _set_4(clk, enable[4], tag, in_pcid, mode, insrt_pa, hit[4], transl_pa[4], clr_set[4]);
-set _set_5(clk, enable[5], tag, in_pcid, mode, insrt_pa, hit[5], transl_pa[5], clr_set[5]);
-set _set_6(clk, enable[6], tag, in_pcid, mode, insrt_pa, hit[6], transl_pa[6], clr_set[6]);
-set _set_7(clk, enable[7], tag, in_pcid, mode, insrt_pa, hit[7], transl_pa[7], clr_set[7]);    
+set _set_4(clk, enable[4], tag, in_pcid, insrt_pa, hit[4], transl_pa[4], clr_set[4]);
+set _set_5(clk, enable[5], tag, in_pcid, insrt_pa, hit[5], transl_pa[5], clr_set[5]);
+set _set_6(clk, enable[6], tag, in_pcid, insrt_pa, hit[6], transl_pa[6], clr_set[6]);
+set _set_7(clk, enable[7], tag, in_pcid, insrt_pa, hit[7], transl_pa[7], clr_set[7]);    
 
 initial begin
     enable = 0;
     prev_addr = 0;
-    mode = 0;
 end
 
 always @(posedge clk) begin
