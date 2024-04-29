@@ -17,14 +17,14 @@ module set_tb;
         clk = 0;
         pcid = 12'h0;
 
-        va = 64'hffffffffffffffff;
+        va = 64'hfffffffffffffff1;
         pa = 0;
 
         #10
         va = 64'h0;
         pa = 0;
         #10 
-        va = 64'hffffffffffffffff;
+        va = 64'hfffffffffffffff2;
         pa = 0;
 
         #100 $finish;
