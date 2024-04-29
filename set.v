@@ -209,7 +209,7 @@ set _set_3(clk, enable[3], tag, in_pcid, insrt_pa, hit[3], transl_pa[3], clr_set
 set _set_4(clk, enable[4], tag, in_pcid, insrt_pa, hit[4], transl_pa[4], clr_set[4]);
 set _set_5(clk, enable[5], tag, in_pcid, insrt_pa, hit[5], transl_pa[5], clr_set[5]);
 set _set_6(clk, enable[6], tag, in_pcid, insrt_pa, hit[6], transl_pa[6], clr_set[6]);
-set _set_7(clk, enable[7], tag, in_pcid, insrt_pa, hit[7], transl_pa[7], clr_set[7]);    
+set _set_7(clk, enable[7], tag, in_pcid, insrt_pa, hit[7], transl_pa[7], clr_set[7]);
 
 initial begin
     enable = 0;
