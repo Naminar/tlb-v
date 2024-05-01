@@ -1,5 +1,5 @@
 
-module mmu
+module pmu
 (   input clk,
     input tlb_hit,
     input tlb_miss,

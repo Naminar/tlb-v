@@ -14,7 +14,7 @@ module tlb_tb;
     wire [63:0] stat_prefetch;
     
     cache TLB(clk, shutdown, insert, va, pa, pcid, o_addr, hit, miss);
-    mmu MMU(clk, hit, miss, insert, stat_hit, stat_miss, stat_prefetch);
+    pmu PMU(clk, hit, miss, insert, stat_hit, stat_miss, stat_prefetch);
     
     initial begin
         $dumpfile("tlb_tb.vcd");
