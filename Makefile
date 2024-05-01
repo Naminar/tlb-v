@@ -1,8 +1,12 @@
 
-NAME=set
+TLB=tlb
+MMU=mmu
+WAY=way
+FOLDER=build
 cmp:
-	iverilog -o $(NAME) $(NAME)_tb.v $(NAME).v
-	./$(NAME)
+	if test -d $(FOLDER); then echo ; else mkdir $(FOLDER); fi
+	iverilog -o $(FOLDER)/$(TLB) $(TLB)_tb.v $(TLB).v  $(WAY).v $(MMU).v
+	./$(FOLDER)/$(TLB)
 
 all: cmp
-	wine surfer/surfer.exe $(NAME)_tb.vcd
+	wine surfer/surfer.exe $(TLB)_tb.vcd
