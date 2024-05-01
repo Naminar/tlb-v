@@ -13,7 +13,7 @@ module set_tb;
     initial begin
         $dumpfile("set_tb.vcd");
         $dumpvars(0,set_tb);
-        $monitor("%t | clk = %d | out = %d", $time, clk, TLB.tag_way7[3'd7]);
+        // $monitor("%t | clk = %d | out = %d", $time, clk, TLB.gen_way._way_[3'd7]);
 
         clk = 0;
         pcid = 12'h0;
@@ -25,6 +25,15 @@ module set_tb;
         va = 64'h0;
         pa = 0;
         #10 
+        pcid = 1'b1;
+        va = 64'hfffffffffffffff1;
+        pa = 0;
+        #10
+        pcid = 1'b0;
+        va = 64'hfffffffffffffff1;
+        pa = 0;
+        #10
+        pcid = 1'b1;
         va = 64'hfffffffffffffff1;
         pa = 0;
 

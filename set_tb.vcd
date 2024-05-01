@@ -1,5 +1,5 @@
 $date
-	Mon Apr 29 22:37:32 2024
+	Tue Apr 30 14:53:43 2024
 $end
 $version
 	Icarus Verilog
@@ -20,31 +20,225 @@ $var wire 1 $ clk $end
 $var wire 64 ( pa [63:0] $end
 $var wire 12 ) pcid [11:0] $end
 $var wire 64 * va [63:0] $end
-$var wire 49 + tag [48:0] $end
-$var wire 3 , set [2:0] $end
-$var wire 12 - local_addr [11:0] $end
+$var wire 8 + way_hit [7:0] $end
+$var wire 49 , tag [48:0] $end
+$var wire 3 - set [2:0] $end
+$var wire 12 . local_addr [11:0] $end
 $var reg 1 # hit $end
 $var reg 1 " miss $end
-$var reg 64 . prev_addr [63:0] $end
-$var reg 2 / state [1:0] $end
-$var reg 64 0 ta [63:0] $end
-$scope begin init $end
-$var integer 32 1 a [31:0] $end
-$var integer 32 2 i [31:0] $end
+$var reg 64 / prev_addr [63:0] $end
+$var reg 12 0 prev_pcid [11:0] $end
+$var reg 2 1 state [1:0] $end
+$var reg 64 2 ta [63:0] $end
+$var reg 8 3 write [7:0] $end
+$var integer 32 4 a [31:0] $end
+$scope function use_mask $end
+$var reg 1 5 mask $end
+$var reg 1 6 plru $end
+$var reg 1 7 value $end
+$upscope $end
+$scope begin ways[0] $end
+$scope module w $end
+$var wire 1 $ clk $end
+$var wire 52 8 pa [51:0] $end
+$var wire 12 9 pcid [11:0] $end
+$var wire 3 : set [2:0] $end
+$var wire 2 ; state [1:0] $end
+$var wire 49 < tag [48:0] $end
+$var wire 1 = write $end
+$var reg 1 > hit $end
+$var reg 52 ? ta [51:0] $end
+$var integer 32 @ i [31:0] $end
+$upscope $end
+$upscope $end
+$scope begin ways[1] $end
+$scope module w $end
+$var wire 1 $ clk $end
+$var wire 52 A pa [51:0] $end
+$var wire 12 B pcid [11:0] $end
+$var wire 3 C set [2:0] $end
+$var wire 2 D state [1:0] $end
+$var wire 49 E tag [48:0] $end
+$var wire 1 F write $end
+$var reg 1 G hit $end
+$var reg 52 H ta [51:0] $end
+$var integer 32 I i [31:0] $end
+$upscope $end
+$upscope $end
+$scope begin ways[2] $end
+$scope module w $end
+$var wire 1 $ clk $end
+$var wire 52 J pa [51:0] $end
+$var wire 12 K pcid [11:0] $end
+$var wire 3 L set [2:0] $end
+$var wire 2 M state [1:0] $end
+$var wire 49 N tag [48:0] $end
+$var wire 1 O write $end
+$var reg 1 P hit $end
+$var reg 52 Q ta [51:0] $end
+$var integer 32 R i [31:0] $end
+$upscope $end
+$upscope $end
+$scope begin ways[3] $end
+$scope module w $end
+$var wire 1 $ clk $end
+$var wire 52 S pa [51:0] $end
+$var wire 12 T pcid [11:0] $end
+$var wire 3 U set [2:0] $end
+$var wire 2 V state [1:0] $end
+$var wire 49 W tag [48:0] $end
+$var wire 1 X write $end
+$var reg 1 Y hit $end
+$var reg 52 Z ta [51:0] $end
+$var integer 32 [ i [31:0] $end
+$upscope $end
+$upscope $end
+$scope begin ways[4] $end
+$scope module w $end
+$var wire 1 $ clk $end
+$var wire 52 \ pa [51:0] $end
+$var wire 12 ] pcid [11:0] $end
+$var wire 3 ^ set [2:0] $end
+$var wire 2 _ state [1:0] $end
+$var wire 49 ` tag [48:0] $end
+$var wire 1 a write $end
+$var reg 1 b hit $end
+$var reg 52 c ta [51:0] $end
+$var integer 32 d i [31:0] $end
+$upscope $end
+$upscope $end
+$scope begin ways[5] $end
+$scope module w $end
+$var wire 1 $ clk $end
+$var wire 52 e pa [51:0] $end
+$var wire 12 f pcid [11:0] $end
+$var wire 3 g set [2:0] $end
+$var wire 2 h state [1:0] $end
+$var wire 49 i tag [48:0] $end
+$var wire 1 j write $end
+$var reg 1 k hit $end
+$var reg 52 l ta [51:0] $end
+$var integer 32 m i [31:0] $end
+$upscope $end
+$upscope $end
+$scope begin ways[6] $end
+$scope module w $end
+$var wire 1 $ clk $end
+$var wire 52 n pa [51:0] $end
+$var wire 12 o pcid [11:0] $end
+$var wire 3 p set [2:0] $end
+$var wire 2 q state [1:0] $end
+$var wire 49 r tag [48:0] $end
+$var wire 1 s write $end
+$var reg 1 t hit $end
+$var reg 52 u ta [51:0] $end
+$var integer 32 v i [31:0] $end
+$upscope $end
+$upscope $end
+$scope begin ways[7] $end
+$scope module w $end
+$var wire 1 $ clk $end
+$var wire 52 w pa [51:0] $end
+$var wire 12 x pcid [11:0] $end
+$var wire 3 y set [2:0] $end
+$var wire 2 z state [1:0] $end
+$var wire 49 { tag [48:0] $end
+$var wire 1 | write $end
+$var reg 1 } hit $end
+$var reg 52 ~ ta [51:0] $end
+$var integer 32 !" i [31:0] $end
+$upscope $end
 $upscope $end
 $upscope $end
 $upscope $end
 $enddefinitions $end
 #0
 $dumpvars
-b1000 2
-b1000 1
-bx 0
+b1000 !"
+bx ~
+0}
+0|
+b1111111111111111111111111111111111111111111111111 {
+b0 z
+b111 y
+b0 x
+b0 w
+b1000 v
+bx u
+0t
+0s
+b1111111111111111111111111111111111111111111111111 r
+b0 q
+b111 p
+b0 o
+b0 n
+b1000 m
+bx l
+0k
+0j
+b1111111111111111111111111111111111111111111111111 i
+b0 h
+b111 g
+b0 f
+b0 e
+b1000 d
+bx c
+0b
+0a
+b1111111111111111111111111111111111111111111111111 `
+b0 _
+b111 ^
+b0 ]
+b0 \
+b1000 [
+bx Z
+0Y
+0X
+b1111111111111111111111111111111111111111111111111 W
+b0 V
+b111 U
+b0 T
+b0 S
+b1000 R
+bx Q
+0P
+0O
+b1111111111111111111111111111111111111111111111111 N
+b0 M
+b111 L
+b0 K
+b0 J
+b1000 I
+bx H
+0G
+0F
+b1111111111111111111111111111111111111111111111111 E
+b0 D
+b111 C
+b0 B
+b0 A
+b1000 @
+bx ?
+0>
+0=
+b1111111111111111111111111111111111111111111111111 <
+b0 ;
+b111 :
+b0 9
+b0 8
+x7
+x6
+x5
+b1000 4
+b0 3
+bx 2
+b0 1
+b0 0
 b0 /
-b0 .
-b111111110001 -
-b111 ,
-b1111111111111111111111111111111111111111111111111 +
+b111111110001 .
+b111 -
+b1111111111111111111111111111111111111111111111111 ,
+b0 +
 b1111111111111111111111111111111111111111111111111111111111110001 *
 b0 )
 b0 (
@@ -57,30 +251,58 @@ x"
 bx !
 $end
 #1
-b1111111111111111111111111111111111111111111111111111111111110001 .
-b1 /
+b1111111111111111111111111111111111111111111111111111111111110001 /
+b1 1
+b1 ;
+b1 D
+b1 M
+b1 V
+b1 _
+b1 h
+b1 q
+b1 z
 0#
 0"
 1$
 #2
 0$
 #3
-b10 /
+b10 1
+b10 ;
+b10 D
+b10 M
+b10 V
+b10 _
+b10 h
+b10 q
+b10 z
 0#
 bx111111110001 !
-bx111111110001 0
+bx111111110001 2
 1$
 #4
 0$
 #5
-b0 /
+b0 1
+b0 ;
+b0 D
+b0 M
+b0 V
+b0 _
+b0 h
+b0 q
+b0 z
 b111111110001 !
-b111111110001 0
+b111111110001 2
 1"
+1|
+b10000000 3
 1$
 #6
 0$
 #7
+0|
+b0 3
 0"
 1$
 #8
@@ -88,23 +310,84 @@ b111111110001 0
 #9
 1$
 #10
+b0 .
 b0 -
+b0 :
+b0 C
+b0 L
+b0 U
+b0 ^
+b0 g
+b0 p
+b0 y
 b0 ,
-b0 +
+b0 <
+b0 E
+b0 N
+b0 W
+b0 `
+b0 i
+b0 r
+b0 {
 0$
 b0 '
 b0 *
 #11
-b0 .
-b1 /
+b0 ?
+1>
+b0 H
+1G
+b0 Q
+1P
+b0 Z
+1Y
+b0 c
+1b
+b0 l
+1k
+b0 u
+1t
+b0 ~
+b11111111 +
+1}
+b0 /
+b1 1
+b1 ;
+b1 D
+b1 M
+b1 V
+b1 _
+b1 h
+b1 q
+b1 z
 1$
 #12
 0$
 #13
-b0 /
+0>
+0G
+0P
+0Y
+0b
+0k
+0t
+b0 +
+0}
+b0 1
+b0 ;
+b0 D
+b0 M
+b0 V
+b0 _
+b0 h
+b0 q
+b0 z
 1#
 b0 !
-b0 0
+b0 2
+16
+15
+17
 1$
 #14
 0$
@@ -120,33 +403,88 @@ b0 0
 #19
 1$
 #20
-b111111110001 -
-b111 ,
-b1111111111111111111111111111111111111111111111111 +
+b111111110001 .
+b111 -
+b111 :
+b111 C
+b111 L
+b111 U
+b111 ^
+b111 g
+b111 p
+b111 y
+b1111111111111111111111111111111111111111111111111 ,
+b1111111111111111111111111111111111111111111111111 <
+b1111111111111111111111111111111111111111111111111 E
+b1111111111111111111111111111111111111111111111111 N
+b1111111111111111111111111111111111111111111111111 W
+b1111111111111111111111111111111111111111111111111 `
+b1111111111111111111111111111111111111111111111111 i
+b1111111111111111111111111111111111111111111111111 r
+b1111111111111111111111111111111111111111111111111 {
 0$
 b1111111111111111111111111111111111111111111111111111111111110001 '
 b1111111111111111111111111111111111111111111111111111111111110001 *
+b1 &
+b1 )
+b1 9
+b1 B
+b1 K
+b1 T
+b1 ]
+b1 f
+b1 o
+b1 x
 #21
-b1111111111111111111111111111111111111111111111111111111111110001 .
-b1 /
+b1 0
+b1111111111111111111111111111111111111111111111111111111111110001 /
+b1 1
+b1 ;
+b1 D
+b1 M
+b1 V
+b1 _
+b1 h
+b1 q
+b1 z
 1$
 #22
 0$
 #23
-b10 /
+b10 1
+b10 ;
+b10 D
+b10 M
+b10 V
+b10 _
+b10 h
+b10 q
+b10 z
 0#
 b111111110001 !
-b111111110001 0
+b111111110001 2
 1$
 #24
 0$
 #25
-b0 /
+b0 1
+b0 ;
+b0 D
+b0 M
+b0 V
+b0 _
+b0 h
+b0 q
+b0 z
 1"
+1X
+b1000 3
 1$
 #26
 0$
 #27
+0X
+b0 3
 0"
 1$
 #28
@@ -175,15 +513,51 @@ b0 /
 1$
 #40
 0$
+b0 &
+b0 )
+b0 9
+b0 B
+b0 K
+b0 T
+b0 ]
+b0 f
+b0 o
+b0 x
 #41
+b10000000 +
+1}
+b0 0
+b1 1
+b1 ;
+b1 D
+b1 M
+b1 V
+b1 _
+b1 h
+b1 q
+b1 z
 1$
 #42
 0$
 #43
+b0 +
+0}
+b0 1
+b0 ;
+b0 D
+b0 M
+b0 V
+b0 _
+b0 h
+b0 q
+b0 z
+1#
+16
 1$
 #44
 0$
 #45
+0#
 1$
 #46
 0$
@@ -334,4 +708,44 @@ b0 /
 #119
 1$
 #120
+0$
+#121
+1$
+#122
+0$
+#123
+1$
+#124
+0$
+#125
+1$
+#126
+0$
+#127
+1$
+#128
+0$
+#129
+1$
+#130
+0$
+#131
+1$
+#132
+0$
+#133
+1$
+#134
+0$
+#135
+1$
+#136
+0$
+#137
+1$
+#138
+0$
+#139
+1$
+#140
 0$
