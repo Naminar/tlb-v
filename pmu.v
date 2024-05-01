@@ -11,9 +11,9 @@ module pmu
 
 reg [2:0] prev_state_reg = 0;
 
-reg [63:0] dTLB_hit      = 0;
-reg [63:0] dTLB_miss     = 0;
-reg [63:0] dTLB_prefetch = 0;
+reg unsigned [63:0] dTLB_hit      = 0;
+reg unsigned [63:0] dTLB_miss     = 0;
+reg unsigned [63:0] dTLB_prefetch = 0;
 
 assign out1 = dTLB_hit;
 assign out2 = dTLB_miss;
