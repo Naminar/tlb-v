@@ -21,6 +21,7 @@ For each hit or new insertion in cache there's a need to rebuild plru-tree.
 
 //state ranege
 `define STATE_R 1:0 
+`include "log/log2.v"
 
 module cache 
 #(
@@ -32,7 +33,7 @@ module cache
 )
 (
     input clk,
-    // input  shutdown,
+    input  shutdown,
     // input insert,
     input  [SADDR-1:0] va, // virtual address
     input  [SADDR-1:0] pa, // physical address
@@ -97,6 +98,10 @@ endgenerate
 
 always @(posedge clk) begin
     
+    if (shutdown != 0) begin
+        state <= state_waiting;
+    end
+
     case (state)
         state_waiting: begin
             miss <= 0;

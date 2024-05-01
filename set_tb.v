@@ -1,6 +1,7 @@
 module set_tb;
 
     reg clk;
+    reg shutdown;
     reg [63:0] va;
     reg [63:0] pa;
     reg [11:0] pcid;
@@ -8,7 +9,7 @@ module set_tb;
     wire hit;
     wire miss;
     
-    cache TLB(clk, va, pa, pcid, o_addr, hit, miss);
+    cache TLB(clk, shutdown, va, pa, pcid, o_addr, hit, miss);
 
     initial begin
         $dumpfile("set_tb.vcd");
@@ -16,6 +17,7 @@ module set_tb;
         // $monitor("%t | clk = %d | out = %d", $time, clk, TLB.gen_way._way_[3'd7]);
 
         clk = 0;
+        shutdown = 0;
         pcid = 12'h0;
 
         va = 64'hfffffffffffffff1;
