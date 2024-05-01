@@ -16,7 +16,7 @@ module set_tb;
         $dumpfile("set_tb.vcd");
         $dumpvars(0,set_tb);
         // $monitor("");
-        $monitor("%t | clk = %d | pcid = %d | plru = %b | tlb hit = %b | tlb miss = %b | %d | %d | %d | %d", $time, clk, TLB.ways[7].w.way_pcid[3'd7], TLB.plru[3'd7], TLB.hit, TLB.miss, TLB.ways[7].w.way_pcid[3'd7], TLB.ways[7].w.way_tag[3'd7], TLB.ways[3].w.way_pcid[3'd7], TLB.ways[3].w.way_tag[3'd7]);
+        $monitor("%t | clk = %d | pcid = %d | plru = %b | tlb hit = %b | tlb miss = %b | %d | %d | %d | %d", $time, clk, TLB.ways[7].w.pcid[3'd7], TLB.plru[3'd7], TLB.hit, TLB.miss, TLB.ways[7].w.pcid[3'd7], TLB.ways[7].w.tag[3'd7], TLB.ways[3].w.pcid[3'd7], TLB.ways[3].w.tag[3'd7]);
 
         clk = 0;
         shutdown = 0;
