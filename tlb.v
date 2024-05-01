@@ -25,11 +25,9 @@ For each hit or new insertion in cache there's a need to rebuild plru-tree.
 parameter state_waiting = 3'b000;\
 parameter state_req     = 3'b001;\
 parameter state_miss    = 3'b010;\
-parameter state_write   = 3'b011;\
 parameter state_insert  = 3'b100;\
 parameter state_shutdown= 3'b101;
-
-`include "log/log2.v"
+// parameter state_write   = 3'b011;\
 
 module cache 
 #(
@@ -88,29 +86,23 @@ wire [NWAY-1:0] way_hit;
 wire [SADDR-SPAGE-1:0] way_ta [NWAY-1:0];
 reg [NWAY-1:0] write = 0;
 
-// way way_0 (clk, state, set, tag, pcid, ta[], hit[])
-
 genvar ind; 
 generate
     for (ind = 0; ind < NWAY; ind = ind + 1) begin: ways
-        way  w();//clk, state, write[ind], set, tag, pcid, pa[SADDR-1:SPAGE], way_ta[ind], way_hit[ind]);
+        way  w();
     end
 endgenerate
  
 
 always @(posedge clk) begin
     
-    if (prev_addr != va || pcid != prev_pcid) begin
+    if (state != state_shutdown && ( prev_addr != va || pcid != prev_pcid)) begin
        state <= state_req;
        prev_addr <= va;
        prev_pcid <= pcid;
-    end
-
-    if (shutdown != 0) begin
-        state <= state_waiting;
-    end
-
-    if (insert != 0) begin
+    end else if (shutdown != 0) begin
+        state <= state_shutdown;
+    end else if (insert != 0) begin
         state <= state_insert;
     end
 
@@ -131,49 +123,49 @@ always @(posedge clk) begin
                 // plru[set][1] = 1'b0;
                 // plru[set][3] = 1'b0;
                 plru[set] = new_plru(plru[set], 7'b0001011, 7'b0000000);
-                ta[SADDR-1:SPAGE] <= way_ta[0];
+                ta[SADDR-1:SPAGE] <= ways[0].w.pa[set];
             end else if(ways[1].w.tag[set] == tag && ways[1].w.pcid[set] == pcid) begin
                 // plru[set][0] = 1'b0;
                 // plru[set][1] = 1'b0;
                 // plru[set][3] = 1'b1;
                 plru[set] = new_plru(plru[set], 7'b0001011, 7'b0001000);
-                ta[SADDR-1:SPAGE] <= way_ta[1];
+                ta[SADDR-1:SPAGE] <= ways[1].w.pa[set];
             end else if(ways[2].w.tag[set] == tag && ways[2].w.pcid[set] == pcid) begin
                 // plru[set][0] = 1'b0;
                 // plru[set][1] = 1'b1;
                 // plru[set][4] = 1'b0;
                 plru[set] = new_plru(plru[set], 7'b0001011, 7'b0000010);
-                ta[SADDR-1:SPAGE] <= way_ta[2];
+                ta[SADDR-1:SPAGE] <= ways[2].w.pa[set];
             end else if(ways[3].w.tag[set] == tag && ways[3].w.pcid[set] == pcid) begin
                 // plru[set][0] = 1'b0;
                 // plru[set][1] = 1'b1;
                 // plru[set][4] = 1'b1;
                 plru[set] = new_plru(plru[set], 7'b0010011, 7'b0010010);
-                ta[SADDR-1:SPAGE] <= way_ta[3];
+                ta[SADDR-1:SPAGE] <= ways[3].w.pa[set];
             end else if(ways[4].w.tag[set] == tag && ways[4].w.pcid[set] == pcid) begin
                 // plru[set][0] = 1'b1;
                 // plru[set][2] = 1'b0;
                 // plru[set][5] = 1'b0;
                 plru[set] = new_plru(plru[set], 7'b0100101, 7'b0000001);
-                ta[SADDR-1:SPAGE] <= way_ta[4];
+                ta[SADDR-1:SPAGE] <= ways[4].w.pa[set];
             end else if(ways[5].w.tag[set] == tag && ways[5].w.pcid[set] == pcid) begin
                 // plru[set][0] = 1'b1;
                 // plru[set][2] = 1'b0;
                 // plru[set][5] = 1'b1;
                 plru[set] = new_plru(plru[set], 7'b0100101, 7'b0100001);
-                ta[SADDR-1:SPAGE] <= way_ta[5];
+                ta[SADDR-1:SPAGE] <= ways[5].w.pa[set];
             end else if(ways[6].w.tag[set] == tag && ways[6].w.pcid[set] == pcid) begin
                 // plru[set][0] = 1'b1;
                 // plru[set][2] = 1'b1;
                 // plru[set][6] = 1'b0;
                 plru[set] = new_plru(plru[set], 7'b1000101, 7'b0000101);
-                ta[SADDR-1:SPAGE] <= way_ta[6];
+                ta[SADDR-1:SPAGE] <= ways[6].w.pa[set];
             end else if(ways[7].w.tag[set] == tag && ways[7].w.pcid[set] == pcid) begin
                 // plru[set][0] = 1'b1;
                 // plru[set][2] = 1'b1;
                 // plru[set][6] = 1'b1;
                 plru[set] = new_plru(plru[set], 7'b1000101, 7'b1000101);
-                ta[SADDR-1:SPAGE] <= way_ta[7];
+                ta[SADDR-1:SPAGE] <= ways[7].w.pa[set];
             end else begin
                 miss <= 1'b1;
                 hit <= 1'b0;
@@ -262,71 +254,45 @@ always @(posedge clk) begin
             end
             state <= state_waiting; 
         end
+
+        state_shutdown: begin: shutdown_tlb
+            integer  s_ind;
+            for (s_ind = 0; s_ind < NSET; s_ind = s_ind + 1) begin
+                ways[0].w.tag[s_ind]  <= 0;
+                ways[0].w.pcid[s_ind] <= 0;
+                ways[0].w.pa[s_ind]   <= 0; 
+                
+                ways[1].w.tag[s_ind]  <= 0;
+                ways[1].w.pcid[s_ind] <= 0;
+                ways[1].w.pa[s_ind]   <= 0; 
+
+                ways[2].w.tag[s_ind]  <= 0;
+                ways[2].w.pcid[s_ind] <= 0;
+                ways[2].w.pa[s_ind]   <= 0; 
+
+                ways[3].w.tag[s_ind]  <= 0;
+                ways[3].w.pcid[s_ind] <= 0;
+                ways[3].w.pa[s_ind]   <= 0; 
+
+                ways[4].w.tag[s_ind]  <= 0;
+                ways[4].w.pcid[s_ind] <= 0;
+                ways[4].w.pa[s_ind]   <= 0; 
+
+                ways[5].w.tag[s_ind]  <= 0;
+                ways[5].w.pcid[s_ind] <= 0;
+                ways[5].w.pa[s_ind]   <= 0; 
+
+                ways[6].w.tag[s_ind]  <= 0;
+                ways[6].w.pcid[s_ind] <= 0;
+                ways[6].w.pa[s_ind]   <= 0; 
+
+                ways[7].w.tag[s_ind]  <= 0;
+                ways[7].w.pcid[s_ind] <= 0;
+                ways[7].w.pa[s_ind]   <= 0;  
+            end
+            state <= state_waiting;
+        end
         default: ;
     endcase
 end
-endmodule
-
-
-module way 
-#(  parameter SADDR=64, // size of address
-    parameter SPAGE=12, // size of page
-    parameter NSET=8,   // set number
-    parameter SPCID=12, // size of pcid
-    parameter NWAY=8    // way number
-)  
-(   //input clk,
-//     input [`STATE_R] state,
-//     input write,
-//     input [$clog2(NSET)-1:0]             set,
-//     input [SADDR-1-SPAGE-$clog2(NSET):0] tag,
-//     input  [SPCID-1:0] pcid,
-//     input [SADDR-SPAGE-1:0] pa,
-//     output reg [SADDR-SPAGE-1:0] ta,
-//     output reg hit = 1'b1
-);
-
-    // parameter state_waiting = 2'b00;
-    // parameter state_req     = 2'b01;
-    // parameter state_miss    = 2'b10;
-    // parameter state_write   = 2'b11;
-    `STATE
-
-    reg [SADDR-$clog2(NWAY)-1:0]    tag  [NSET-1:0];
-    reg [SPCID-1:0]                 pcid [NSET-1:0];
-    reg [SADDR-SPAGE-1:0]           pa   [NSET-1:0];
-
-    integer i;
-    initial begin
-        for (i = 0; i < NSET; i = i + 1) begin
-            pa[i]   = 0;        
-            pcid[i] = 0;
-            tag[i]  = 0;
-        end        
-    end
-  
-    // always @(*) begin
-    //     case (state)
-    //         state_waiting:begin
-    //            hit = 1'b0; 
-    //         end
-    //         state_req: begin
-    //             if(way_tag[set] == tag && way_pcid[set] == pcid) begin
-    //                 hit = 1'b1;
-    //                 ta = way_pa[set];
-    //             end
-    //         end
-    //         state_insert: begin
-    //             if(write != 0) begin
-    //                 way_tag[set] <= tag;
-    //                 way_pcid[set] <= pcid;
-    //                 way_pa[set] <= pa;
-    //             end
-    //         end 
-    //         default:;
-    //     endcase        
-    // end
-
-    
-    
 endmodule
