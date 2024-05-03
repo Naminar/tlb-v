@@ -1,3 +1,4 @@
 
 tlb
+*.vcd
 *.out
