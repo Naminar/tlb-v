@@ -75,7 +75,7 @@ reg [SPCID-1:0] prev_pcid = 0;
 
 integer a;
 initial begin
-    for (a = 0; a < NWAY; a = a + 1)
+    for (a = 0; a < NSET; a = a + 1)
         plru[a] = 0;
 end
 
@@ -256,6 +256,8 @@ always @(posedge clk) begin
         end
 
         state_shutdown: begin: shutdown_tlb
+            // There's a possibility to avoid these statements by additing
+            // always@ block inside way module.
             integer  s_ind;
             for (s_ind = 0; s_ind < NSET; s_ind = s_ind + 1) begin
                 ways[0].w.tag[s_ind]  <= 0;
