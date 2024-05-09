@@ -29,7 +29,7 @@ parameter state_insert  = 3'b100;\
 parameter state_shutdown= 3'b101;
 // parameter state_write   = 3'b011;\
 
-module cache 
+module TLB 
 #(
     parameter SADDR=64, // size of address
     parameter SPAGE=12, // size of page
@@ -89,7 +89,7 @@ reg [NWAY-1:0] write = 0;
 genvar ind; 
 generate
     for (ind = 0; ind < NWAY; ind = ind + 1) begin: ways
-        way  w();
+        WAY w();
     end
 endgenerate
  
