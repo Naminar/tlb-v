@@ -1,4 +1,5 @@
 
 tlb
+debug.v
 *.vcd
 *.out
