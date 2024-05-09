@@ -3,28 +3,33 @@ module tlb_tb;
     reg clk;
     reg shutdown;
     reg insert;
+    reg validate;
     reg [63:0] va;
     reg [63:0] pa;
     reg [11:0] pcid;
     wire [63:0] o_addr;
-    wire hit;
-    wire miss;
+    wire TLB_hit;
+    wire STLB_hit;
+    wire TLB_miss;
+    wire STLB_miss;
     wire [63:0] stat_hit;
     wire [63:0] stat_miss;
     wire [63:0] stat_prefetch;
     
-    cache TLB(clk, shutdown, insert, va, pa, pcid, o_addr, hit, miss);
-    pmu PMU(clk, hit, miss, insert, stat_hit, stat_miss, stat_prefetch);
+    TLB tlb(clk, shutdown, insert, va, pa, pcid, o_addr, TLB_hit, TLB_miss);
+    PMU pmu(clk, TLB_hit, TLB_miss, insert, STLB_hit, STLB_miss, insert, stat_hit, stat_miss, stat_prefetch);
+    STLB stlb(clk, shutdown, insert, validate, va, pa, pcid, o_addr, STLB_hit, STLB_miss);
     
     initial begin
         $dumpfile("tlb_tb.vcd");
         $dumpvars(0,tlb_tb);
         // $monitor("");
-        $monitor("%t | clk = %d | pcid = %d | plru = %b | tlb hit = %b | tlb miss = %b | %d | %d | %d | %d", $time, clk, TLB.ways[7].w.pcid[3'd7], TLB.plru[3'd7], TLB.hit, TLB.miss, TLB.ways[7].w.pcid[3'd7], TLB.ways[7].w.tag[3'd7], TLB.ways[3].w.pcid[3'd7], TLB.ways[3].w.tag[3'd7]);
+        $monitor("%t | clk = %d | pcid = %d | plru = %b | tlb hit = %b | tlb miss = %b | %d | %d | %d | %d", $time, clk, tlb.ways[7].w.pcid[3'd7], tlb.plru[3'd7], tlb.hit, tlb.miss, tlb.ways[7].w.pcid[3'd7], tlb.ways[7].w.tag[3'd7], tlb.ways[3].w.pcid[3'd7], tlb.ways[3].w.tag[3'd7]);
 
         clk = 0;
         shutdown = 0;
         insert = 0;
+        validate = 0;
         
         pcid = 1'b0;
         va = 64'hfffffffffffffff1;
