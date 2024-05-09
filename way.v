@@ -19,7 +19,7 @@ and 2 - to the right.
 For each hit or new insertion in cache there's a need to rebuild plru-tree. 
 */ 
 
-module way 
+module WAY 
 #(  parameter SADDR=64, // size of address
     parameter SPAGE=12, // size of page
     parameter NSET=8,   // set number
@@ -62,7 +62,7 @@ and 2 - to the right.
 For each hit or new insertion in cache there's a need to rebuild plru-tree. 
 */ 
 
-module stlb_way 
+module STLB_WAY 
 #(  parameter SADDR=64, // size of address
     parameter SPAGE=12, // size of page
     parameter NSET=100,   // set number
@@ -70,7 +70,10 @@ module stlb_way
     parameter NWAY=12    // way number
 )  
 (
-    input shutdown
+    input shutdown, 
+    input validate, 
+    input [SPAGE-1:0] va,
+    input [SPCID-1:0] pcid_va
 );
 
     reg [SADDR-$clog2(NWAY)-1:0]    tag  [NSET-1:0];
