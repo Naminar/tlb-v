@@ -3,7 +3,7 @@
 <!-- ![](README/signals.png) -->
 
 <p align="center">
-	<img src="README/signals.png" 
+	<img src="README/signals-2.png" 
 		width="100%"		
 		style="background-color: transparent;"
 	/>
