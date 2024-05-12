@@ -39,7 +39,7 @@ module TLB
 )
 (
     input clk,
-    input  shutdown,            // clear tlb
+    input shutdown,             // clear tlb
     input insert,               // forcibly insert PTE
     input  [SADDR-1:0] va,      // virtual address
     input  [SADDR-1:0] pa,      // physical address
@@ -117,53 +117,28 @@ always @(posedge clk) begin
             ta[SPAGE-1:0] <= local_addr;
             hit <= 1'b1;
             state <= state_waiting;
-            // ways[0].w.hit != 0
             if(ways[0].w.tag[set] == tag && ways[0].w.pcid[set] == pcid) begin
-                // plru[set][0] = 1'b0;
-                // plru[set][1] = 1'b0;
-                // plru[set][3] = 1'b0;
                 plru[set] = new_plru(plru[set], 7'b0001011, 7'b0000000);
                 ta[SADDR-1:SPAGE] <= ways[0].w.pa[set];
             end else if(ways[1].w.tag[set] == tag && ways[1].w.pcid[set] == pcid) begin
-                // plru[set][0] = 1'b0;
-                // plru[set][1] = 1'b0;
-                // plru[set][3] = 1'b1;
                 plru[set] = new_plru(plru[set], 7'b0001011, 7'b0001000);
                 ta[SADDR-1:SPAGE] <= ways[1].w.pa[set];
             end else if(ways[2].w.tag[set] == tag && ways[2].w.pcid[set] == pcid) begin
-                // plru[set][0] = 1'b0;
-                // plru[set][1] = 1'b1;
-                // plru[set][4] = 1'b0;
                 plru[set] = new_plru(plru[set], 7'b0001011, 7'b0000010);
                 ta[SADDR-1:SPAGE] <= ways[2].w.pa[set];
             end else if(ways[3].w.tag[set] == tag && ways[3].w.pcid[set] == pcid) begin
-                // plru[set][0] = 1'b0;
-                // plru[set][1] = 1'b1;
-                // plru[set][4] = 1'b1;
                 plru[set] = new_plru(plru[set], 7'b0010011, 7'b0010010);
                 ta[SADDR-1:SPAGE] <= ways[3].w.pa[set];
             end else if(ways[4].w.tag[set] == tag && ways[4].w.pcid[set] == pcid) begin
-                // plru[set][0] = 1'b1;
-                // plru[set][2] = 1'b0;
-                // plru[set][5] = 1'b0;
                 plru[set] = new_plru(plru[set], 7'b0100101, 7'b0000001);
                 ta[SADDR-1:SPAGE] <= ways[4].w.pa[set];
             end else if(ways[5].w.tag[set] == tag && ways[5].w.pcid[set] == pcid) begin
-                // plru[set][0] = 1'b1;
-                // plru[set][2] = 1'b0;
-                // plru[set][5] = 1'b1;
                 plru[set] = new_plru(plru[set], 7'b0100101, 7'b0100001);
                 ta[SADDR-1:SPAGE] <= ways[5].w.pa[set];
             end else if(ways[6].w.tag[set] == tag && ways[6].w.pcid[set] == pcid) begin
-                // plru[set][0] = 1'b1;
-                // plru[set][2] = 1'b1;
-                // plru[set][6] = 1'b0;
                 plru[set] = new_plru(plru[set], 7'b1000101, 7'b0000101);
                 ta[SADDR-1:SPAGE] <= ways[6].w.pa[set];
             end else if(ways[7].w.tag[set] == tag && ways[7].w.pcid[set] == pcid) begin
-                // plru[set][0] = 1'b1;
-                // plru[set][2] = 1'b1;
-                // plru[set][6] = 1'b1;
                 plru[set] = new_plru(plru[set], 7'b1000101, 7'b1000101);
                 ta[SADDR-1:SPAGE] <= ways[7].w.pa[set];
             end else begin
@@ -176,9 +151,12 @@ always @(posedge clk) begin
         
         state_miss: begin
             miss <= 1'b1;
-            // end plru tree
-            ta[SADDR-1:0] <= {pa[SADDR-1:SPAGE], local_addr};
-            state <= state_insert;
+            // ta[SADDR-1:0] <= {pa[SADDR-1:SPAGE], local_addr};
+            // state <= state_insert;
+            
+            // wait while stlb reponse; 
+            // state_waiting:
+            state <= state_waiting;
         end
 
         state_insert: begin

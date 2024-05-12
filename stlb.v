@@ -55,6 +55,7 @@ module STLB
 )
 (
     input clk,
+    input tlb_miss,
     input shutdown,             // clear tlb
     input insert,               // forcibly insert PTE
     input validate,             // validate or not PTE (virtual address come from va)
@@ -114,10 +115,11 @@ endgenerate
 
 always @(posedge clk) begin
     
-    if (state != state_shutdown && ( prev_addr != va || pcid != prev_pcid)) begin
+    // if (state != state_shutdown && ( prev_addr != va || pcid != prev_pcid)) begin
+    if (state != state_shutdown && tlb_miss) begin
        state <= state_req;
-       prev_addr <= va;
-       prev_pcid <= pcid;
+    //    prev_addr <= va;
+    //    prev_pcid <= pcid;
     end else if (shutdown != 0) begin
         state <= state_shutdown;
     end else if (insert != 0) begin
