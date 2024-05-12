@@ -172,7 +172,6 @@ always @(posedge clk) begin
                         ways[1].w.pa[set]   <= pa[SADDR-1:SPAGE];
                     end
                     else begin
-                        // write[0] = 1'b1;
                         ways[0].w.tag[set]  <= tag;
                         ways[0].w.pcid[set] <= pcid;
                         ways[0].w.pa[set]   <= pa[SADDR-1:SPAGE];
