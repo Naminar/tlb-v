@@ -5,7 +5,7 @@ WAY=way
 FOLDER=build
 cmp:
 	if test -d $(FOLDER); then echo ; else mkdir $(FOLDER); fi
-	iverilog -o $(FOLDER)/$(TLB) $(TLB)_tb.v stlb.v $(TLB).v  $(WAY).v $(PMU).v
+	iverilog -o $(FOLDER)/$(TLB) $(TLB)_tb.v stlb.v $(TLB).v  $(WAY).v $(PMU).v mmu.v
 	./$(FOLDER)/$(TLB)
 
 d:
