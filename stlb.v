@@ -1,22 +1,5 @@
-`define STATE_R 2:0
-
-`define STATE                    \
-parameter state_waiting = 3'b000;\
-parameter state_req     = 3'b001;\
-parameter state_miss    = 3'b010;\
-parameter state_insert  = 3'b100;\
-parameter state_shutdown= 3'b101;
-// parameter state_write   = 3'b011;\
-
-// valide   = [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE]
-// tag      = [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE-1:SPCID+SADDR-SPAGE]
-// pcid     = [SPCID+SADDR-SPAGE-1:SADDR-SPAGE]
-// pa       = [SADDR-SPAGE-1:0]
-
-`define VALIDE_BIT [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE]
-`define TAG_RANGE [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE-1:SPCID+SADDR-SPAGE]
-`define PCID_RANGE [SPCID+SADDR-SPAGE-1:SADDR-SPAGE]
-`define PA_RANGE [SADDR-SPAGE-1:0]
+`include "inc/range.v"
+`include "inc/state.v"
 
 `define WAY_CHECK(way, mru_value, plru_reg_n, mask, value)                                  \
 if(entries[set][way]`VALIDE_BIT                                                             \
@@ -82,28 +65,24 @@ function [2:0] new_plru(input [2:0] old_plru, input [2:0] mask, input [2:0] valu
     end
 endfunction 
 
+`STATE
+
 wire [SPAGE-1:0]                    local_addr      = va[SPAGE-1:0];
 wire [$clog2(NSET)-1:0]             set             = va[SPAGE+$clog2(NSET)-1:SPAGE];
-wire [SADDR-1-SPAGE-$clog2(NSET):0] tag             = va[SADDR-1:SPAGE+$clog2(NSET)];
+wire [SADDR-1-SPAGE-$clog2(NSET):0] tag             = va[SADDR-1:SPAGE+$clog2(NSET)]; 
 
-`STATE 
-
-reg [`STATE_R] state = state_waiting;
-
+reg [`STATE_R] state;
 reg [1:0] mru_top_reg;
 reg [2:0] plru_reg_1 [NSET-1:0];
 reg [2:0] plru_reg_2 [NSET-1:0];
 reg [2:0] plru_reg_3 [NSET-1:0]; 
-
-reg [SADDR-1:0] prev_addr = 0;
-reg [SPCID-1:0] prev_pcid = 0;
-
 reg [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE:0] entries [NSET-1:0][NWAY-1:0];
 
 initial begin: init_plru_and_entries
-    // integer a;
+    mru_top_reg     = 0;
+    state[`STATE_R] = state_waiting;
+    
     integer  w_ind, s_ind, a;
-    mru_top_reg = 0;
     for (a = 0; a < NSET; a = a + 1) begin
         plru_reg_1[a] = 0;
         plru_reg_2[a] = 0;
@@ -141,12 +120,8 @@ generate
 endgenerate
 
 always @(posedge clk) begin
-    
-    // if (state != state_shutdown && ( prev_addr != va || pcid != prev_pcid)) begin
     if (state != state_shutdown && tlb_miss) begin
        state <= state_req;
-    //    prev_addr <= va;
-    //    prev_pcid <= pcid;
     end else if (shutdown != 0) begin
         state <= state_shutdown;
     end else if (insert != 0) begin
@@ -215,7 +190,7 @@ always @(posedge clk) begin
         end
 
         state_shutdown: begin
-            // another always block: line 139
+            // another always block: line 108
             state <= state_waiting;
         // end state_shutdown
         end

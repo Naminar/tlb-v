@@ -1,17 +1,5 @@
-//state ranege
-`define STATE_R 2:0
-`define STATE                    \
-parameter state_waiting = 3'b000;\
-parameter state_req     = 3'b001;\
-parameter state_miss    = 3'b010;\
-parameter state_insert  = 3'b100;\
-parameter state_shutdown= 3'b101;
-// parameter state_write   = 3'b011;\
-
-`define VALIDE_BIT [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE]
-`define TAG_RANGE [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE-1:SPCID+SADDR-SPAGE]
-`define PCID_RANGE [SPCID+SADDR-SPAGE-1:SADDR-SPAGE]
-`define PA_RANGE [SADDR-SPAGE-1:0]
+`include "inc/range.v"
+`include "inc/state.v"
 
 module TLB 
 #(
@@ -39,21 +27,22 @@ function [6:0] new_plru(input [6:0] old_plru, input [6:0] mask, input [6:0] valu
     end
 endfunction 
 
+`STATE
+
 wire [SPAGE-1:0]                    local_addr      = va[SPAGE-1:0];
 wire [$clog2(NSET)-1:0]             set             = va[SPAGE+$clog2(NSET)-1:SPAGE];
 wire [SADDR-1-SPAGE-$clog2(NSET):0] tag             = va[SADDR-1:SPAGE+$clog2(NSET)];
 
-`STATE 
-
-reg [`STATE_R] state = state_waiting;
+reg [`STATE_R] state;
 reg [NWAY-2:0] plru [NSET-1:0];    
 reg [SADDR-1:0] prev_addr = 0;
 reg [SPCID-1:0] prev_pcid = 0;
-
 // include valid bit, but didn't used.
 reg [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE:0] entries [NSET-1:0][NWAY-1:0];
 
 initial begin: init_plru_and_entries
+    state[`STATE_R] = state_waiting;
+
     integer  w_ind, s_ind, a;
     for (a = 0; a < NSET; a = a + 1)
         plru[a] = 0;
@@ -75,7 +64,7 @@ genvar s_ind;
 generate
     for (s_ind = 0; s_ind < NSET; s_ind = s_ind + 1) begin: clear
         always @(posedge clk) begin: shutdown_stlb
-            if (state == state_shutdown) begin: shutdown_stlb
+            if (state == state_shutdown) begin: shutdown_tlb
                 integer  w_ind;
                 for (w_ind = 0; w_ind < NWAY; w_ind = w_ind + 1) begin
                     entries[s_ind][w_ind]`VALIDE_BIT    <= 0;
@@ -89,7 +78,6 @@ generate
 endgenerate 
 
 always @(posedge clk) begin
-    
     if (state != state_shutdown && ( prev_addr != va || pcid != prev_pcid)) begin
        state <= state_req;
        prev_addr <= va;
@@ -110,7 +98,7 @@ always @(posedge clk) begin
             ta[SPAGE-1:0] <= local_addr;
             hit <= 1'b1;
             state <= state_waiting;
-            
+
             if(entries[set][0]`TAG_RANGE == tag && entries[set][0]`PCID_RANGE == pcid) begin
                 plru[set] = new_plru(plru[set], 7'b0001011, 7'b0000000);
                 ta[SADDR-1:SPAGE] <= entries[set][0]`PA_RANGE;
@@ -224,6 +212,7 @@ always @(posedge clk) begin
         end
 
         state_shutdown: begin
+            // another always block: line 66
             state <= state_waiting;
         // end state_shutdown
         end
