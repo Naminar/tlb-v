@@ -41,9 +41,9 @@ reg [SPCID-1:0] prev_pcid = 0;
 reg [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE:0] entries [NSET-1:0][NWAY-1:0];
 
 initial begin: init_plru_and_entries
+    integer  w_ind, s_ind, a;
     state[`STATE_R] = state_waiting;
 
-    integer  w_ind, s_ind, a;
     for (a = 0; a < NSET; a = a + 1)
         plru[a] = 0;
     

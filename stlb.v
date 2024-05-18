@@ -79,10 +79,10 @@ reg [2:0] plru_reg_3 [NSET-1:0];
 reg [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE:0] entries [NSET-1:0][NWAY-1:0];
 
 initial begin: init_plru_and_entries
+    integer  w_ind, s_ind, a;
     mru_top_reg     = 0;
     state[`STATE_R] = state_waiting;
     
-    integer  w_ind, s_ind, a;
     for (a = 0; a < NSET; a = a + 1) begin
         plru_reg_1[a] = 0;
         plru_reg_2[a] = 0;
