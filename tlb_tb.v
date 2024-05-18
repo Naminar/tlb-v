@@ -1,3 +1,7 @@
+
+`define TAG_RANGE [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE-1:SPCID+SADDR-SPAGE]
+`define PCID_RANGE [SPCID+SADDR-SPAGE-1:SADDR-SPAGE]
+
 module tlb_tb;
 
     reg clk;
@@ -16,6 +20,13 @@ module tlb_tb;
     wire [63:0] stat_miss;
     wire [63:0] stat_prefetch;
     
+    parameter SADDR=64; 
+    parameter SPAGE=12; 
+    parameter NSET=8;   
+    parameter SPCID=12; 
+    parameter NWAY=8;    
+
+
     TLB tlb(clk, shutdown, insert, va, pa, pcid, o_addr, TLB_hit, TLB_miss);
     PMU pmu(clk, TLB_hit, TLB_miss, insert, STLB_hit, STLB_miss, insert, stat_hit, stat_miss, stat_prefetch);
     STLB stlb(clk, shutdown, insert, validate, va, pa, pcid, o_addr, STLB_hit, STLB_miss);
@@ -24,7 +35,7 @@ module tlb_tb;
         $dumpfile("tlb_tb.vcd");
         $dumpvars(0,tlb_tb);
         // $monitor("");
-        $monitor("%t | clk = %d | pcid = %d | plru = %b | tlb hit = %b | tlb miss = %b | %d | %d | %d | %d", $time, clk, tlb.ways[7].w.pcid[3'd7], tlb.plru[3'd7], tlb.hit, tlb.miss, tlb.ways[7].w.pcid[3'd7], tlb.ways[7].w.tag[3'd7], tlb.ways[3].w.pcid[3'd7], tlb.ways[3].w.tag[3'd7]);
+        $monitor("%t | clk = %d | pcid = %d | plru = %b | tlb hit = %b | tlb miss = %b | %d | %d | %d | %d", $time, clk, tlb.entries[3'd7][7]`PCID_RANGE, tlb.plru[3'd7], tlb.hit, tlb.miss, tlb.entries[3'd7][7]`PCID_RANGE, tlb.entries[3'd7][7]`TAG_RANGE, tlb.entries[3'd7][3]`PCID_RANGE, tlb.entries[3'd7][3]`TAG_RANGE);
 
         clk = 0;
         shutdown = 0;
