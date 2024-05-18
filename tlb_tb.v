@@ -11,7 +11,7 @@ module tlb_tb;
     reg [63:0] va;
     reg [63:0] pa;
     reg [11:0] pcid;
-    wire [63:0] o_addr;
+    wire [63:0] ta;
     wire TLB_hit;
     wire STLB_hit;
     wire TLB_miss;
@@ -31,6 +31,8 @@ module tlb_tb;
     PMU pmu(clk, TLB_hit, TLB_miss, insert, STLB_hit, STLB_miss, insert, stat_hit, stat_miss, stat_prefetch);
     STLB stlb(clk, shutdown, insert, validate, va, pa, pcid, o_addr, STLB_hit, STLB_miss);
     
+    MMU mmu(clk, shutdown, insert, insert, validate, va, pa, pcid, ta);
+
     initial begin
         $dumpfile("tlb_tb.vcd");
         $dumpvars(0,tlb_tb);
@@ -46,7 +48,7 @@ module tlb_tb;
         va = 64'hfffffffffffffff1;
         pa = 0;
 
-        #10
+        #20
 
         #1 
         assign shutdown = 1;
@@ -65,19 +67,19 @@ module tlb_tb;
         pcid = 1'b1;
         va = 64'hfffffffffffffff1;
         pa = 0;
-        #10
+        #20
         pcid = 1'b0;
         va = 64'hfffffffffffffff1;
         pa = 0;
-        #10
+        #20
         pcid = 1'b1;
         va = 64'hfffffffffffffff1;
         pa = 0;
-        #10
+        #20
         pcid = 1'b0;
         va = 64'hfffffffffffffff1;
         pa = 0;
-        #10
+        #20
         pcid = 1'b1;
         va = 64'hfffffffffffffff1;
         pa = 0;

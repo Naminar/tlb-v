@@ -23,7 +23,7 @@ module TLB
 )
 (
     input clk,
-    input  shutdown,            // clear tlb
+    input shutdown,             // clear tlb
     input insert,               // forcibly insert PTE
     input  [SADDR-1:0] va,      // virtual address
     input  [SADDR-1:0] pa,      // physical address
@@ -110,6 +110,7 @@ always @(posedge clk) begin
             ta[SPAGE-1:0] <= local_addr;
             hit <= 1'b1;
             state <= state_waiting;
+            
             if(entries[set][0]`TAG_RANGE == tag && entries[set][0]`PCID_RANGE == pcid) begin
                 plru[set] = new_plru(plru[set], 7'b0001011, 7'b0000000);
                 ta[SADDR-1:SPAGE] <= entries[set][0]`PA_RANGE;
@@ -151,9 +152,7 @@ always @(posedge clk) begin
         
         state_miss: begin
             miss <= 1'b1;
-            ta[SADDR-1:0] <= {pa[SADDR-1:SPAGE], local_addr};
-            state <= state_insert;
-        // end state_miss
+            state <= state_waiting;
         end
 
         state_insert: begin
