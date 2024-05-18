@@ -8,41 +8,50 @@ parameter state_insert  = 3'b100;\
 parameter state_shutdown= 3'b101;
 // parameter state_write   = 3'b011;\
 
-// plru_reg_n[set] <= new_plru(plru_reg_n[set], 3'111, 3'111);
+// valide   = [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE]
+// tag      = [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE-1:SPCID+SADDR-SPAGE]
+// pcid     = [SPCID+SADDR-SPAGE-1:SADDR-SPAGE]
+// pa       = [SADDR-SPAGE-1:0]
 
-`define WAY_CHECK(way, mru_value, plru_reg_n, mask, value)\
-if(stlb_ways[way].w.valid[set] && stlb_ways[way].w.tag[set] == tag && stlb_ways[way].w.pcid[set] == pcid) begin\
-    mru_top_reg <= mru_value;\
-    plru_reg_n[set] <= new_plru(plru_reg_n[set], mask, value);\
-    ta[SADDR-1:SPAGE] <= stlb_ways[way].w.pa[set];\
+`define `VALIDE_BIT [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE]
+`define TAG_RANGE [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE-1:SPCID+SADDR-SPAGE]
+`define PCID_RANGE [SPCID+SADDR-SPAGE-1:SADDR-SPAGE]
+`define PA_RANGE [SADDR-SPAGE-1:0]
+
+`define WAY_CHECK(way, mru_value, plru_reg_n, mask, value)                                  \
+if(entries[set][way]`VALIDE_BIT                                                             \
+    && entries[set][way]`TAG_RANGE == tag                                                   \
+    && entries[set][way]`PCID_RANGE == pcid)                                                \
+    begin                                                                                   \
+        mru_top_reg <= mru_value;                                                           \
+        plru_reg_n[set] <= new_plru(plru_reg_n[set], mask, value);                          \
+        ta[SADDR-1:SPAGE] <= entries[set][way][SADDR-SPAGE-1:0];                            \
 end else
-// stlb_ways[order*4+].w.tag[set]  <= tag ;
-// stlb_ways[order*4+].w.pcid[set] <= pcid;
-// #TODO 
-`define TREE_INVERS(plru_reg_n, order)\
-plru_reg_n[set][0] <= !plru_reg_n[set][0];\
-if (plru_reg_n[set][0]) begin\
-    plru_reg_n[set][2] <= !plru_reg_n[set][2];\
-    if (plru_reg_n[set][2]) begin\
-        stlb_ways[order*4+3].w.valid[set] <= 1'b1;\
-        stlb_ways[order*4+3].w.tag[set]  <= tag ;\
-        stlb_ways[order*4+3].w.pcid[set] <= pcid;\
-    end else begin\
-        stlb_ways[order*4+2].w.valid[set] <= 1'b1;\
-        stlb_ways[order*4+2].w.tag[set]  <= tag ;\
-        stlb_ways[order*4+2].w.pcid[set] <= pcid;\
-    end\
-end else begin\
-    plru_reg_n[set][1] <= !plru_reg_n[set][1];\
-    if (plru_reg_n[set][1]) begin\
-        stlb_ways[order*4+1].w.valid[set] <= 1'b1;\
-        stlb_ways[order*4+1].w.tag[set]  <= tag ;\
-        stlb_ways[order*4+1].w.pcid[set] <= pcid;\
-    end else begin\
-        stlb_ways[order*4].w.valid[set] <= 1'b1;\
-        stlb_ways[order*4].w.tag[set]  <= tag ;\
-        stlb_ways[order*4].w.pcid[set] <= pcid;\
-    end\
+
+`define TREE_INVERS(plru_reg_n, order)                                                      \
+plru_reg_n[set][0] <= !plru_reg_n[set][0];                                                  \
+if (plru_reg_n[set][0]) begin                                                               \
+    plru_reg_n[set][2] <= !plru_reg_n[set][2];                                              \
+    if (plru_reg_n[set][2]) begin                                                           \
+        entries[set][order*4+3]`VALIDE_BIT <= 1'b1;                                         \
+        entries[set][order*4+3]`TAG_RANGE  <= tag ;                                         \
+        entries[set][order*4+3]`PCID_RANGE <= pcid;                                         \
+    end else begin                                                                          \
+        entries[set][order*4+2]`VALIDE_BIT <= 1'b1;                                         \
+        entries[set][order*4+2]`TAG_RANGE  <= tag ;                                         \
+        entries[set][order*4+2]`PCID_RANGE <= pcid;                                         \
+    end                                                                                     \
+end else begin                                                                              \
+    plru_reg_n[set][1] <= !plru_reg_n[set][1];                                              \
+    if (plru_reg_n[set][1]) begin                                                           \
+        entries[set][order*4+1]`VALIDE_BIT <= 1'b1;                                         \
+        entries[set][order*4+1]`TAG_RANGE  <= tag ;                                         \
+        entries[set][order*4+1]`PCID_RANGE <= pcid;                                         \
+    end else begin                                                                          \
+        entries[set][order*4]`VALIDE_BIT <= 1'b1;                                           \
+        entries[set][order*4]`TAG_RANGE  <= tag ;                                           \
+        entries[set][order*4]`PCID_RANGE <= pcid;                                           \
+    end                                                                                     \
 end
 
 module STLB 
@@ -66,9 +75,9 @@ module STLB
     output reg miss
 );
 
-function [3:0] new_plru(input [3:0] old_plru, input [3:0] mask, input [3:0] value);
+function [2:0] new_plru(input [2:0] old_plru, input [2:0] mask, input [2:0] value);
     begin 
-        new_plru = (old_plru & !mask) | (mask & value);
+        new_plru = (old_plru & ~mask) | (mask & value);
     end
 endfunction 
 
@@ -88,29 +97,46 @@ reg [2:0] plru_reg_3 [NSET-1:0];
 reg [SADDR-1:0] prev_addr = 0;
 reg [SPCID-1:0] prev_pcid = 0;
 
-integer a;
-initial begin
-    mru_top_reg <= 0;
+initial begin: init_plru_and_entries
+    integer a;
+    integer  w_ind, s_ind;
+    mru_top_reg = 0;
     for (a = 0; a < NSET; a = a + 1)
         plru_reg_1[a] = 0;
         plru_reg_2[a] = 0;
         plru_reg_3[a] = 0;
+    
+    for (s_ind = 0; s_ind < NSET; s_ind = s_ind + 1) begin
+        for (w_ind = 0; w_ind < NWAY; w_ind = w_ind + 1) begin
+            entries[s_ind][w_ind]`VALIDE_BIT  = 0;
+            entries[s_ind][w_ind]`TAG_RANGE     = 0;
+            entries[s_ind][w_ind]`PCID_RANGE    = 0;
+            entries[s_ind][w_ind]`PA_RANGE      = 0; 
+        end
+    end
 end
 
 /********************************************************************
                              STATE MACHINE
 ********************************************************************/
-wire [NWAY-1:0] way_hit;
-wire [SADDR-SPAGE-1:0] way_ta [NWAY-1:0];
-reg [NWAY-1:0] write = 0;
+reg [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE:0] entries [NSET-1:0][NWAY-1:0]; 
 
-genvar ind;
+genvar s_ind;
 generate
-    for (ind = 0; ind < NWAY; ind = ind + 1) begin: stlb_ways
-        STLB_WAY  w(shutdown, validate, va[SPAGE-1:0], pcid);
+    for (s_ind = 0; s_ind < NSET; s_ind = s_ind + 1) begin: clear
+        always @(posedge clk) begin: shutdown_stlb
+            if (state == state_shutdown) begin: shutdown_stlb
+                integer  w_ind;
+                for (w_ind = 0; w_ind < NWAY; w_ind = w_ind + 1) begin
+                    entries[s_ind][w_ind]`VALIDE_BIT    <= 0;
+                    entries[s_ind][w_ind]`TAG_RANGE     <= 0;
+                    entries[s_ind][w_ind]`PCID_RANGE    <= 0;
+                    entries[s_ind][w_ind]`PA_RANGE      <= 0; 
+                end
+            end
+        end
     end
 endgenerate
- 
 
 always @(posedge clk) begin
     
@@ -128,7 +154,7 @@ always @(posedge clk) begin
         state_waiting: begin
             miss <= 0;
             hit  <= 0;
-            write <= 0;
+            // write <= 0;
         end
         
         state_req: begin
@@ -186,7 +212,7 @@ always @(posedge clk) begin
         end
 
         state_shutdown: begin
-            // inside-way process
+            // another always block: line 139
             state <= state_waiting;
         end
         default: ;
