@@ -97,18 +97,21 @@ reg [2:0] plru_reg_3 [NSET-1:0];
 reg [SADDR-1:0] prev_addr = 0;
 reg [SPCID-1:0] prev_pcid = 0;
 
+reg [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE:0] entries [NSET-1:0][NWAY-1:0];
+
 initial begin: init_plru_and_entries
-    integer a;
-    integer  w_ind, s_ind;
+    // integer a;
+    integer  w_ind, s_ind, a;
     mru_top_reg = 0;
-    for (a = 0; a < NSET; a = a + 1)
+    for (a = 0; a < NSET; a = a + 1) begin
         plru_reg_1[a] = 0;
         plru_reg_2[a] = 0;
         plru_reg_3[a] = 0;
+    end
     
     for (s_ind = 0; s_ind < NSET; s_ind = s_ind + 1) begin
         for (w_ind = 0; w_ind < NWAY; w_ind = w_ind + 1) begin
-            entries[s_ind][w_ind]`VALIDE_BIT  = 0;
+            entries[s_ind][w_ind]`VALIDE_BIT    = 0;
             entries[s_ind][w_ind]`TAG_RANGE     = 0;
             entries[s_ind][w_ind]`PCID_RANGE    = 0;
             entries[s_ind][w_ind]`PA_RANGE      = 0; 
@@ -119,8 +122,6 @@ end
 /********************************************************************
                              STATE MACHINE
 ********************************************************************/
-reg [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE:0] entries [NSET-1:0][NWAY-1:0]; 
-
 genvar s_ind;
 generate
     for (s_ind = 0; s_ind < NSET; s_ind = s_ind + 1) begin: clear
@@ -154,7 +155,6 @@ always @(posedge clk) begin
         state_waiting: begin
             miss <= 0;
             hit  <= 0;
-            // write <= 0;
         end
         
         state_req: begin
