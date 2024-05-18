@@ -1,48 +1,40 @@
-`define STATE_R 2:0
+`include "inc/range.v"
+`include "inc/state.v"
 
-`define STATE                    \
-parameter state_waiting = 3'b000;\
-parameter state_req     = 3'b001;\
-parameter state_miss    = 3'b010;\
-parameter state_insert  = 3'b100;\
-parameter state_shutdown= 3'b101;
-// parameter state_write   = 3'b011;\
-
-// plru_reg_n[set] <= new_plru(plru_reg_n[set], 3'111, 3'111);
-
-`define WAY_CHECK(way, mru_value, plru_reg_n, mask, value)\
-if(stlb_ways[way].w.valid[set] && stlb_ways[way].w.tag[set] == tag && stlb_ways[way].w.pcid[set] == pcid) begin\
-    mru_top_reg <= mru_value;\
-    plru_reg_n[set] <= new_plru(plru_reg_n[set], mask, value);\
-    ta[SADDR-1:SPAGE] <= stlb_ways[way].w.pa[set];\
+`define WAY_CHECK(way, mru_value, plru_reg_n, mask, value)                                  \
+if(entries[set][way]`VALIDE_BIT                                                             \
+    && entries[set][way]`TAG_RANGE == tag                                                   \
+    && entries[set][way]`PCID_RANGE == pcid)                                                \
+    begin                                                                                   \
+        mru_top_reg <= mru_value;                                                           \
+        plru_reg_n[set] <= new_plru(plru_reg_n[set], mask, value);                          \
+        ta[SADDR-1:SPAGE] <= entries[set][way][SADDR-SPAGE-1:0];                            \
 end else
-// stlb_ways[order*4+].w.tag[set]  <= tag ;
-// stlb_ways[order*4+].w.pcid[set] <= pcid;
-// #TODO 
-`define TREE_INVERS(plru_reg_n, order)\
-plru_reg_n[set][0] <= !plru_reg_n[set][0];\
-if (plru_reg_n[set][0]) begin\
-    plru_reg_n[set][2] <= !plru_reg_n[set][2];\
-    if (plru_reg_n[set][2]) begin\
-        stlb_ways[order*4+3].w.valid[set] <= 1'b1;\
-        stlb_ways[order*4+3].w.tag[set]  <= tag ;\
-        stlb_ways[order*4+3].w.pcid[set] <= pcid;\
-    end else begin\
-        stlb_ways[order*4+2].w.valid[set] <= 1'b1;\
-        stlb_ways[order*4+2].w.tag[set]  <= tag ;\
-        stlb_ways[order*4+2].w.pcid[set] <= pcid;\
-    end\
-end else begin\
-    plru_reg_n[set][1] <= !plru_reg_n[set][1];\
-    if (plru_reg_n[set][1]) begin\
-        stlb_ways[order*4+1].w.valid[set] <= 1'b1;\
-        stlb_ways[order*4+1].w.tag[set]  <= tag ;\
-        stlb_ways[order*4+1].w.pcid[set] <= pcid;\
-    end else begin\
-        stlb_ways[order*4].w.valid[set] <= 1'b1;\
-        stlb_ways[order*4].w.tag[set]  <= tag ;\
-        stlb_ways[order*4].w.pcid[set] <= pcid;\
-    end\
+
+`define TREE_INVERS(plru_reg_n, order)                                                      \
+plru_reg_n[set][0] <= !plru_reg_n[set][0];                                                  \
+if (!plru_reg_n[set][0]) begin                                                              \
+    plru_reg_n[set][2] <= !plru_reg_n[set][2];                                              \
+    if (!plru_reg_n[set][2]) begin                                                          \
+        entries[set][order*4+3]`VALIDE_BIT <= 1'b1;                                         \
+        entries[set][order*4+3]`TAG_RANGE  <= tag ;                                         \
+        entries[set][order*4+3]`PCID_RANGE <= pcid;                                         \
+    end else begin                                                                          \
+        entries[set][order*4+2]`VALIDE_BIT <= 1'b1;                                         \
+        entries[set][order*4+2]`TAG_RANGE  <= tag ;                                         \
+        entries[set][order*4+2]`PCID_RANGE <= pcid;                                         \
+    end                                                                                     \
+end else begin                                                                              \
+    plru_reg_n[set][1] <= !plru_reg_n[set][1];                                              \
+    if (!plru_reg_n[set][1]) begin                                                          \
+        entries[set][order*4+1]`VALIDE_BIT <= 1'b1;                                         \
+        entries[set][order*4+1]`TAG_RANGE  <= tag ;                                         \
+        entries[set][order*4+1]`PCID_RANGE <= pcid;                                         \
+    end else begin                                                                          \
+        entries[set][order*4]`VALIDE_BIT <= 1'b1;                                           \
+        entries[set][order*4]`TAG_RANGE  <= tag ;                                           \
+        entries[set][order*4]`PCID_RANGE <= pcid;                                           \
+    end                                                                                     \
 end
 
 module STLB 
@@ -67,59 +59,69 @@ module STLB
     output reg miss
 );
 
-function [3:0] new_plru(input [3:0] old_plru, input [3:0] mask, input [3:0] value);
+function [2:0] new_plru(input [2:0] old_plru, input [2:0] mask, input [2:0] value);
     begin 
-        new_plru = (old_plru & !mask) | (mask & value);
+        new_plru = (old_plru & ~mask) | (mask & value);
     end
 endfunction 
 
+`STATE
+
 wire [SPAGE-1:0]                    local_addr      = va[SPAGE-1:0];
 wire [$clog2(NSET)-1:0]             set             = va[SPAGE+$clog2(NSET)-1:SPAGE];
-wire [SADDR-1-SPAGE-$clog2(NSET):0] tag             = va[SADDR-1:SPAGE+$clog2(NSET)];
+wire [SADDR-1-SPAGE-$clog2(NSET):0] tag             = va[SADDR-1:SPAGE+$clog2(NSET)]; 
 
-`STATE 
-
-reg [`STATE_R] state = state_waiting;
-
+reg [`STATE_R] state;
 reg [1:0] mru_top_reg;
 reg [2:0] plru_reg_1 [NSET-1:0];
 reg [2:0] plru_reg_2 [NSET-1:0];
 reg [2:0] plru_reg_3 [NSET-1:0]; 
+reg [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE:0] entries [NSET-1:0][NWAY-1:0];
 
-reg [SADDR-1:0] prev_addr = 0;
-reg [SPCID-1:0] prev_pcid = 0;
-
-integer a;
-initial begin
-    mru_top_reg <= 0;
-    for (a = 0; a < NSET; a = a + 1)
+initial begin: init_plru_and_entries
+    integer  w_ind, s_ind, a;
+    mru_top_reg     = 0;
+    state[`STATE_R] = state_waiting;
+    
+    for (a = 0; a < NSET; a = a + 1) begin
         plru_reg_1[a] = 0;
         plru_reg_2[a] = 0;
         plru_reg_3[a] = 0;
+    end
+    
+    for (s_ind = 0; s_ind < NSET; s_ind = s_ind + 1) begin
+        for (w_ind = 0; w_ind < NWAY; w_ind = w_ind + 1) begin
+            entries[s_ind][w_ind]`VALIDE_BIT    = 0;
+            entries[s_ind][w_ind]`TAG_RANGE     = 0;
+            entries[s_ind][w_ind]`PCID_RANGE    = 0;
+            entries[s_ind][w_ind]`PA_RANGE      = 0; 
+        end
+    end
 end
 
 /********************************************************************
                              STATE MACHINE
 ********************************************************************/
-wire [NWAY-1:0] way_hit;
-wire [SADDR-SPAGE-1:0] way_ta [NWAY-1:0];
-reg [NWAY-1:0] write = 0;
-
-genvar ind;
+genvar s_ind;
 generate
-    for (ind = 0; ind < NWAY; ind = ind + 1) begin: stlb_ways
-        STLB_WAY  w(shutdown, validate, va[SPAGE-1:0], pcid);
+    for (s_ind = 0; s_ind < NSET; s_ind = s_ind + 1) begin: clear
+        always @(posedge clk) begin: shutdown_stlb
+            if (state == state_shutdown) begin: shutdown_stlb
+                integer  w_ind;
+                for (w_ind = 0; w_ind < NWAY; w_ind = w_ind + 1) begin
+                    entries[s_ind][w_ind]`VALIDE_BIT    <= 0;
+                    entries[s_ind][w_ind]`TAG_RANGE     <= 0;
+                    entries[s_ind][w_ind]`PCID_RANGE    <= 0;
+                    entries[s_ind][w_ind]`PA_RANGE      <= 0; 
+                end
+            end
+        end
     end
 endgenerate
- 
 
 always @(posedge clk) begin
-    
-    // if (state != state_shutdown && ( prev_addr != va || pcid != prev_pcid)) begin
     if (state != state_shutdown && tlb_miss) begin
        state <= state_req;
-    //    prev_addr <= va;
-    //    prev_pcid <= pcid;
     end else if (shutdown != 0) begin
         state <= state_shutdown;
     end else if (insert != 0) begin
@@ -130,7 +132,6 @@ always @(posedge clk) begin
         state_waiting: begin
             miss <= 0;
             hit  <= 0;
-            write <= 0;
         end
         
         state_req: begin
@@ -161,9 +162,9 @@ always @(posedge clk) begin
         
         state_miss: begin
             miss <= 1'b1;
-            // end plru tree
             ta[SADDR-1:0] <= {pa[SADDR-1:SPAGE], local_addr};
             state <= state_insert;
+        // end state_miss
         end
 
         state_insert: begin           
@@ -184,12 +185,14 @@ always @(posedge clk) begin
                 mru_top_reg <= 2'b00;
             else
                 mru_top_reg <= mru_top_reg + 1'b1;
-            state <= state_waiting; 
+            state <= state_waiting;
+        // end state_insert
         end
 
         state_shutdown: begin
-            // inside-way process
+            // another always block: line 108
             state <= state_waiting;
+        // end state_shutdown
         end
         default: ;
     endcase
