@@ -13,7 +13,7 @@ parameter state_shutdown= 3'b101;
 // pcid     = [SPCID+SADDR-SPAGE-1:SADDR-SPAGE]
 // pa       = [SADDR-SPAGE-1:0]
 
-`define `VALIDE_BIT [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE]
+`define VALIDE_BIT [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE]
 `define TAG_RANGE [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE-1:SPCID+SADDR-SPAGE]
 `define PCID_RANGE [SPCID+SADDR-SPAGE-1:SADDR-SPAGE]
 `define PA_RANGE [SADDR-SPAGE-1:0]
@@ -30,9 +30,9 @@ end else
 
 `define TREE_INVERS(plru_reg_n, order)                                                      \
 plru_reg_n[set][0] <= !plru_reg_n[set][0];                                                  \
-if (plru_reg_n[set][0]) begin                                                               \
+if (!plru_reg_n[set][0]) begin                                                              \
     plru_reg_n[set][2] <= !plru_reg_n[set][2];                                              \
-    if (plru_reg_n[set][2]) begin                                                           \
+    if (!plru_reg_n[set][2]) begin                                                          \
         entries[set][order*4+3]`VALIDE_BIT <= 1'b1;                                         \
         entries[set][order*4+3]`TAG_RANGE  <= tag ;                                         \
         entries[set][order*4+3]`PCID_RANGE <= pcid;                                         \
@@ -43,7 +43,7 @@ if (plru_reg_n[set][0]) begin                                                   
     end                                                                                     \
 end else begin                                                                              \
     plru_reg_n[set][1] <= !plru_reg_n[set][1];                                              \
-    if (plru_reg_n[set][1]) begin                                                           \
+    if (!plru_reg_n[set][1]) begin                                                          \
         entries[set][order*4+1]`VALIDE_BIT <= 1'b1;                                         \
         entries[set][order*4+1]`TAG_RANGE  <= tag ;                                         \
         entries[set][order*4+1]`PCID_RANGE <= pcid;                                         \
@@ -185,9 +185,9 @@ always @(posedge clk) begin
         
         state_miss: begin
             miss <= 1'b1;
-            // end plru tree
             ta[SADDR-1:0] <= {pa[SADDR-1:SPAGE], local_addr};
             state <= state_insert;
+        // end state_miss
         end
 
         state_insert: begin           
@@ -208,12 +208,14 @@ always @(posedge clk) begin
                 mru_top_reg <= 2'b00;
             else
                 mru_top_reg <= mru_top_reg + 1'b1;
-            state <= state_waiting; 
+            state <= state_waiting;
+        // end state_insert
         end
 
         state_shutdown: begin
             // another always block: line 139
             state <= state_waiting;
+        // end state_shutdown
         end
         default: ;
     endcase
