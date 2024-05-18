@@ -27,9 +27,9 @@ module tlb_tb;
     parameter NWAY=8;    
 
 
-    TLB tlb(clk, shutdown, insert, va, pa, pcid, o_addr, TLB_hit, TLB_miss);
-    PMU pmu(clk, TLB_hit, TLB_miss, insert, STLB_hit, STLB_miss, insert, stat_hit, stat_miss, stat_prefetch);
-    STLB stlb(clk, shutdown, insert, validate, va, pa, pcid, o_addr, STLB_hit, STLB_miss);
+    // TLB tlb(clk, shutdown, insert, va, pa, pcid, o_addr, TLB_hit, TLB_miss);
+    // PMU pmu(clk, TLB_hit, TLB_miss, insert, STLB_hit, STLB_miss, insert, stat_hit, stat_miss, stat_prefetch);
+    // STLB stlb(clk, shutdown, insert, validate, va, pa, pcid, o_addr, STLB_hit, STLB_miss);
     
     MMU mmu(clk, shutdown, insert, insert, validate, va, pa, pcid, ta);
 
@@ -37,7 +37,7 @@ module tlb_tb;
         $dumpfile("tlb_tb.vcd");
         $dumpvars(0,tlb_tb);
         // $monitor("");
-        $monitor("%t | clk = %d | pcid = %d | plru = %b | tlb hit = %b | tlb miss = %b | %d | %d | %d | %d", $time, clk, tlb.entries[3'd7][7]`PCID_RANGE, tlb.plru[3'd7], tlb.hit, tlb.miss, tlb.entries[3'd7][7]`PCID_RANGE, tlb.entries[3'd7][7]`TAG_RANGE, tlb.entries[3'd7][3]`PCID_RANGE, tlb.entries[3'd7][3]`TAG_RANGE);
+        // $monitor("%t | clk = %d | pcid = %d | plru = %b | tlb hit = %b | tlb miss = %b | %d | %d | %d | %d", $time, clk, tlb.entries[3'd7][7]`PCID_RANGE, tlb.plru[3'd7], tlb.hit, tlb.miss, tlb.entries[3'd7][7]`PCID_RANGE, tlb.entries[3'd7][7]`TAG_RANGE, tlb.entries[3'd7][3]`PCID_RANGE, tlb.entries[3'd7][3]`TAG_RANGE);
 
         clk = 0;
         shutdown = 0;
