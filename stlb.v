@@ -8,7 +8,7 @@ if(entries[set][way]`VALIDE_BIT                                                 
     begin                                                                                   \
         mru_top_reg <= mru_value;                                                           \
         plru_reg_n[set] <= new_plru(plru_reg_n[set], mask, value);                          \
-        ta[SADDR-1:SPAGE] <= entries[set][way][SADDR-SPAGE-1:0];                            \
+        ta[SADDR-1:0] <= {entries[set][way][SADDR-SPAGE-1:0], local_addr};                  \
 end else
 
 `define TREE_INVERS(plru_reg_n, order)                                                      \
@@ -135,7 +135,7 @@ always @(posedge clk) begin
         end
         
         state_req: begin
-            ta[SPAGE-1:0] <= local_addr;
+            // ta[SPAGE-1:0] <= local_addr;
             hit <= 1'b1;
             state <= state_waiting;
             `WAY_CHECK(0, 2'b00, plru_reg_1, 3'b011, 3'b000)
@@ -161,13 +161,13 @@ always @(posedge clk) begin
         end
         
         state_miss: begin
-            miss <= 1'b1;
+            miss <= 1'b0;    
             ta[SADDR-1:0] <= {pa[SADDR-1:SPAGE], local_addr};
             state <= state_insert;
         // end state_miss
         end
 
-        state_insert: begin           
+        state_insert: begin       
             case (mru_top_reg)
                 // SHIFTING:
                 2'b00: begin

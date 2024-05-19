@@ -139,7 +139,7 @@ always @(posedge clk) begin
         end
         
         state_miss: begin
-            miss <= 1'b1;
+            miss <= 1'b0;
             state <= state_waiting;
         end
 
