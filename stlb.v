@@ -161,13 +161,13 @@ always @(posedge clk) begin
         end
         
         state_miss: begin
-            miss <= 1'b1;
+            miss <= 1'b0;    
             ta[SADDR-1:0] <= {pa[SADDR-1:SPAGE], local_addr};
             state <= state_insert;
         // end state_miss
         end
 
-        state_insert: begin           
+        state_insert: begin       
             case (mru_top_reg)
                 // SHIFTING:
                 2'b00: begin
