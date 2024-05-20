@@ -10,7 +10,7 @@ cmp:
 	./$(FOLDER)/$(TLB)
 
 validate:
-	 verilator --lint-only tlb.v stlb.v mmu.v pmu.v
+	 verilator --lint-only tlb.v stlb.v mmu.v pmu.v --top-module MMU
 
 d:
 	iverilog stlb.v way.v -E -o debug.v
