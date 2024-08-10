@@ -147,37 +147,29 @@ module MMU
         // end
 
         /* -------------- DATA PIPING -------------- */
-        // piping_va[5] <= piping_va[4];
-        // piping_va[4] <= piping_va[3];
-        // piping_va[3] <= piping_va[2];
-        // piping_va[2] <= piping_va[1];
-        // piping_va[1] <= piping_va[0];
+        piping_va[5] <= piping_va[4];
+        piping_va[4] <= piping_va[3];
+        piping_va[3] <= piping_va[2];
+        piping_va[2] <= piping_va[1];
+        piping_va[1] <= piping_va[0];
 
-        piping_va <= piping_va << 1'b1;
+        piping_pa[5] <= piping_pa[4];
+        piping_pa[4] <= piping_pa[3];
+        piping_pa[3] <= piping_pa[2];
+        piping_pa[2] <= piping_pa[1];
+        piping_pa[1] <= piping_pa[0];
 
-        // piping_pa[5] <= piping_pa[4];
-        // piping_pa[4] <= piping_pa[3];
-        // piping_pa[3] <= piping_pa[2];
-        // piping_pa[2] <= piping_pa[1];
-        // piping_pa[1] <= piping_pa[0];
+        piping_pcid[5] <= piping_pcid[4];
+        piping_pcid[4] <= piping_pcid[3];
+        piping_pcid[3] <= piping_pcid[2];
+        piping_pcid[2] <= piping_pcid[1];
+        piping_pcid[1] <= piping_pcid[0];
 
-        piping_pa <= piping_pa << 1'b1;
-
-        // piping_pcid[5] <= piping_pcid[4];
-        // piping_pcid[4] <= piping_pcid[3];
-        // piping_pcid[3] <= piping_pcid[2];
-        // piping_pcid[2] <= piping_pcid[1];
-        // piping_pcid[1] <= piping_pcid[0];
-
-        piping_pcid <= piping_pcid << 1'b1;
-
-        // piping_ta[5] <= piping_ta[4];
-        // piping_ta[4] <= piping_ta[3];
-        // piping_ta[3] <= piping_ta[2];
-        // piping_ta[2] <= piping_ta[1];
-        // piping_ta[1] <= piping_ta[0];
-
-        piping_ta <= piping_ta << 1'b1;
+        piping_ta[5] <= piping_ta[4];
+        piping_ta[4] <= piping_ta[3];
+        piping_ta[3] <= piping_ta[2];
+        piping_ta[2] <= piping_ta[1];
+        piping_ta[1] <= piping_ta[0];
     end
 
 endmodule
