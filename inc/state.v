@@ -2,7 +2,8 @@
 `define STATE_V
 
 //state ranege
-`define STATE_R 5:0
+`define STATE_RANGE 5:0
+
 `define STATE                       \
 parameter state_waiting = 6'b000000;\
 parameter state_req     = 6'b000001;\

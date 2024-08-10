@@ -11,7 +11,7 @@ module TLB
 )
 (
     input clk,
-    input [`STATE_R] state,
+    input [`STATE_RANGE] state,
     // input shutdown,                     //   clear tlb
     // input insert,                       //   forcibly insert PTE
     input  [SADDR-1:0] req_va,        // virtual address
@@ -39,7 +39,7 @@ wire [SPAGE-1:0]                    insert_local_addr   = insert_va[SPAGE-1:0];
 wire [$clog2(NSET)-1:0]             insert_set          = insert_va[SPAGE+$clog2(NSET)-1:SPAGE];
 wire [SADDR-1-SPAGE-$clog2(NSET):0] insert_tag          = insert_va[SADDR-1:SPAGE+$clog2(NSET)];
 
-// reg [`STATE_R] state;
+// reg [`STATE_RANGE] state;
 reg [NWAY-2:0] plru [NSET-1:0];
 reg [SADDR-1:0] prev_addr = 0;
 reg [SPCID-1:0] prev_pcid = 0;
@@ -52,7 +52,7 @@ initial begin: init_plru_and_entries
     integer  w_ind, s_ind, a;
     hit = 0;
     miss = 0;
-    // state[`STATE_R] = state_waiting;
+    // state[`STATE_RANGE] = state_waiting;
 
     for (a = 0; a < NSET; a = a + 1)
         plru[a] = 0;
@@ -108,6 +108,7 @@ always @(posedge clk) begin
         if ((state & state_req) == state_req) begin
             req_ta[SPAGE-1:0] <= req_local_addr;
             hit <= 1'b1;
+            miss <= 1'b0;
             // state <= state_waiting;
 
             if(entries[req_set][0]`TAG_RANGE == req_tag && entries[req_set][0]`PCID_RANGE == req_pcid) begin
@@ -151,10 +152,10 @@ always @(posedge clk) begin
         // end state_req
         end
 
-        if ((state & state_miss) == state_miss) begin
-            miss <= 1'b0;
-            // state <= state_waiting;
-        end
+        // if ((state & state_miss) == state_miss) begin
+        //     miss <= 1'b0;
+        //     // state <= state_waiting;
+        // end
 
         if ((state & state_insert) == state_insert) begin
             if (plru[insert_set][0]) begin

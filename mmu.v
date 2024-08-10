@@ -33,8 +33,8 @@ module MMU
     wire  [SADDR-1:0] tlb_insert_pa;
     wire  [SPCID-1:0] tlb_insert_pcid;
     wire  [SADDR-1:0] tlb_req_ta;
-    reg [`STATE_R] tlb_state = 6'b000001;
-    reg [`STATE_R] stlb_state = 6'b000001;
+    reg [`STATE_RANGE] tlb_state = 6'b000001;
+    reg [`STATE_RANGE] stlb_state = 6'b000001;
 
 
     TLB tlb(clk, tlb_state, tlb_req_va, tlb_req_pcid,
@@ -68,16 +68,24 @@ module MMU
     reg [SPCID-1:0] piping_pcid [5:0];     // process-context identifier
     reg [SADDR-1:0] piping_ta   [5:0];  // translated address
 
+    reg [SADDR-1:0] inter_piping_va;
+    reg [SADDR-1:0] inter_piping_pa;
+    reg [SPCID-1:0] inter_piping_pcid;
+    reg [SADDR-1:0] inter_piping_ta;
+
 /* verilator lint_off STMTDLY */
     initial begin
-    piping_va[0] = 64'hfffffffffffffff1;
-    piping_pcid[0] = 12'b0;
-    #2
-    piping_va[0] =  64'h0;
-    piping_pcid[0] = 12'b0;
-    #2
-    piping_va[0] =  64'h1;
-    piping_pcid[0] = 12'b0;
+    inter_piping_va = 64'hfffffffffffffff1;
+    inter_piping_pcid = 12'b0;
+    inter_piping_pa = 64'hfffffffffffffff2;
+    #4
+    inter_piping_va =  64'h0;
+    inter_piping_pcid = 12'b0;
+    inter_piping_pa = 64'h1;
+    #4
+    inter_piping_va =  64'h1;
+    inter_piping_pcid = 12'b0;
+    inter_piping_pa = 64'h2;
     end
 /* verilator lint_off STMTDLY */
 
@@ -86,19 +94,28 @@ module MMU
 
     assign  tlb_req_va      = piping_va[0];
     assign  tlb_req_pcid    = piping_pcid[0];
-    assign  tlb_insert_va   = piping_va[5];
-    assign  tlb_insert_pa   = piping_pa[5];
-    assign  tlb_insert_pcid = piping_pcid[5];
+    assign  tlb_insert_va   = piping_va[3];
+    assign  tlb_insert_pa   = piping_pa[3];
+    assign  tlb_insert_pcid = piping_pcid[3];
 
-    wire lock_bank0; // connect with outputs state of banks and request signal.
-    wire lock_bank1;
-    wire lock_bank2;
-    wire lock_bank3;
+    // wire lock_bank0; // connect with outputs state of banks and request signal.
+    // wire lock_bank1;
+    // wire lock_bank2;
+    // wire lock_bank3;
 
     always @(negedge clk) begin
         /* -------------- TLB PIPELINE -------------- */
-        if (tlb_state`miss_bit == 1'b1) begin
-            tlb_state`miss_bit <= 1'b0;
+        if (piping_va[0] != inter_piping_va || piping_pcid[0] != inter_piping_pcid) begin
+            // prev_va <= inter_piping_va;
+            // prev_pcid <= inter_piping_pcid;
+            tlb_state`req_bit <= 1'b1;
+        end else if (tlb_hit || tlb_miss) begin
+            tlb_state`req_bit <= 1'b0;
+        end
+
+        // if (tlb_state`miss_bit == 1'b1) begin
+        if (tlb_miss) begin
+            // tlb_state`miss_bit <= 1'b0;
             stlb_state`req_bit <= 1'b1;
         end
 
@@ -107,20 +124,47 @@ module MMU
         end
 
         if (tlb_hit) begin
-            tlb_state`req_bit <= 1'b0;
-            piping_ta[0] <= tlb_req_ta;
+            // tlb_state`req_bit <= 1'b0;
+            // piping_ta[0] = tlb_req_ta;
+            ta <= tlb_req_ta;
         end
 
         if (tlb_miss) begin
-            tlb_state`req_bit <= 1'b0;
+            // tlb_state`req_bit <= 1'b0;
             tlb_state`miss_bit <= 1'b1;
+        end else if (tlb_state`miss_bit == 1'b1) begin
+            tlb_state`miss_bit <= 1'b0;
         end
 
-        if (prev_va != piping_va[0] || prev_pcid != piping_pcid[0]) begin
-            prev_va <= piping_va[0];
-            prev_pcid <= piping_pcid[0];
-            tlb_state`req_bit <= 1'b1;
+        /* -------------- STLB PIPELINE -------------- */
+        if (tlb_miss) begin
+            stlb_state`req_bit <= 1'b1;
+        end else if (stlb_hit || stlb_miss) begin
+            stlb_state`req_bit <= 1'b0;
         end
+
+        if (stlb_state`insert_bit == 1'b1) begin
+            stlb_state`insert_bit <= 1'b0;
+        end
+
+        if (stlb_hit) begin
+            // stlb_state`req_bit <= 1'b0;
+            ta <= tlb_req_ta;
+        end
+
+        if (stlb_state`miss_bit == 1'b1) begin
+            tlb_state`insert_bit  <= 1'b1;
+            stlb_state`insert_bit <= 1'b1;
+        end
+
+        if (stlb_miss) begin
+            // stlb_state`req_bit <= 1'b0;
+            stlb_state`miss_bit <= 1'b1;
+        end else if (stlb_state`miss_bit == 1'b1) begin
+            stlb_state`miss_bit <= 1'b0;
+        end
+
+        // /* -------------- STLB PIPELINE -------------- */
 
         // If there is a task, do:
         // tlb_state`req_bit <= 1'b1;
@@ -152,24 +196,29 @@ module MMU
         piping_va[3] <= piping_va[2];
         piping_va[2] <= piping_va[1];
         piping_va[1] <= piping_va[0];
+        piping_va[0] <= inter_piping_va;
 
         piping_pa[5] <= piping_pa[4];
         piping_pa[4] <= piping_pa[3];
         piping_pa[3] <= piping_pa[2];
         piping_pa[2] <= piping_pa[1];
         piping_pa[1] <= piping_pa[0];
+        piping_pa[0] <= inter_piping_pa;  // {SADDR{1'bz}};
+
 
         piping_pcid[5] <= piping_pcid[4];
         piping_pcid[4] <= piping_pcid[3];
         piping_pcid[3] <= piping_pcid[2];
         piping_pcid[2] <= piping_pcid[1];
         piping_pcid[1] <= piping_pcid[0];
+        piping_pcid[0] <= inter_piping_pcid;
 
         piping_ta[5] <= piping_ta[4];
         piping_ta[4] <= piping_ta[3];
         piping_ta[3] <= piping_ta[2];
         piping_ta[2] <= piping_ta[1];
         piping_ta[1] <= piping_ta[0];
+        piping_ta[0] <= {SADDR{1'bz}};
     end
 
 endmodule

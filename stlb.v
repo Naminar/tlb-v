@@ -46,7 +46,7 @@
     output reg [SADDR-1:0] ta_``bank,  \
     output reg hit_``bank,             \
     output reg miss_``bank,            \
-    output reg [`STATE_R] state_``bank
+    output reg [`STATE_RANGE] state_``bank
 
 `define SECTION_INIT(bank)                                                                          \
 wire [SPAGE-1:0]                    local_addr_``bank      = va_``bank[SPAGE-1:0];                  \
@@ -92,10 +92,10 @@ reg [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE:0] entries [NSET-1:0][NWAY-1:0];
 
 initial begin: init_plru_and_entries
     integer  w_ind, s_ind;
-    state_bank0[`STATE_R] = state_waiting;
-    state_bank1[`STATE_R] = state_waiting;
-    state_bank2[`STATE_R] = state_waiting;
-    state_bank3[`STATE_R] = state_waiting;
+    state_bank0[`STATE_RANGE] = state_waiting;
+    state_bank1[`STATE_RANGE] = state_waiting;
+    state_bank2[`STATE_RANGE] = state_waiting;
+    state_bank3[`STATE_RANGE] = state_waiting;
 
     for (s_ind = 0; s_ind < NSET; s_ind = s_ind + 1) begin
         for (w_ind = 0; w_ind < NWAY; w_ind = w_ind + 1) begin
