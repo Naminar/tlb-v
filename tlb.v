@@ -1,7 +1,7 @@
 `include "inc/range.v"
 `include "inc/state.v"
 
-module TLB 
+module TLB
 #(
     parameter SADDR=64, // size of address
     parameter SPAGE=12, // size of page
@@ -25,10 +25,10 @@ module TLB
 );
 
 function [6:0] new_plru(input [6:0] old_plru, input [6:0] mask, input [6:0] value);
-    begin 
+    begin
         new_plru = (old_plru & ~mask) | (mask & value);
     end
-endfunction 
+endfunction
 
 `STATE
 
@@ -40,7 +40,7 @@ wire [$clog2(NSET)-1:0]             insert_set          = insert_va[SPAGE+$clog2
 wire [SADDR-1-SPAGE-$clog2(NSET):0] insert_tag          = insert_va[SADDR-1:SPAGE+$clog2(NSET)];
 
 // reg [`STATE_R] state;
-reg [NWAY-2:0] plru [NSET-1:0];    
+reg [NWAY-2:0] plru [NSET-1:0];
 reg [SADDR-1:0] prev_addr = 0;
 reg [SPCID-1:0] prev_pcid = 0;
 // include valid bit, but didn't used.
@@ -56,13 +56,13 @@ initial begin: init_plru_and_entries
 
     for (a = 0; a < NSET; a = a + 1)
         plru[a] = 0;
-    
+
     for (s_ind = 0; s_ind < NSET; s_ind = s_ind + 1) begin
         for (w_ind = 0; w_ind < NWAY; w_ind = w_ind + 1) begin
             entries[s_ind][w_ind]`VALIDE_BIT    = 0;
             entries[s_ind][w_ind]`TAG_RANGE     = 0;
             entries[s_ind][w_ind]`PCID_RANGE    = 0;
-            entries[s_ind][w_ind]`PA_RANGE      = 0; 
+            entries[s_ind][w_ind]`PA_RANGE      = 0;
         end
     end
 end
@@ -80,12 +80,12 @@ generate
                     entries[s_ind][w_ind]`VALIDE_BIT    <= 0;
                     entries[s_ind][w_ind]`TAG_RANGE     <= 0;
                     entries[s_ind][w_ind]`PCID_RANGE    <= 0;
-                    entries[s_ind][w_ind]`PA_RANGE      <= 0; 
+                    entries[s_ind][w_ind]`PA_RANGE      <= 0;
                 end
             end
         end
     end
-endgenerate 
+endgenerate
 
 always @(posedge clk) begin
     // if (state != state_shutdown && ( prev_addr != va || pcid != prev_pcid)) begin
@@ -104,7 +104,7 @@ always @(posedge clk) begin
             miss <= 0;
             hit  <= 0;
         end
-        
+
         if ((state & state_req) == state_req) begin
             req_ta[SPAGE-1:0] <= req_local_addr;
             hit <= 1'b1;
@@ -150,7 +150,7 @@ always @(posedge clk) begin
             end
         // end state_req
         end
-        
+
         if ((state & state_miss) == state_miss) begin
             miss <= 1'b0;
             // state <= state_waiting;
@@ -162,7 +162,7 @@ always @(posedge clk) begin
                 if (plru[insert_set][1]) begin
                     plru[insert_set][1] = !plru[insert_set][1];
                     plru[insert_set][3] = !plru[insert_set][3];
-                    
+
                     if (plru[insert_set][3]) begin
                         entries[insert_set][1]`TAG_RANGE  <= insert_tag;
                         entries[insert_set][1]`PCID_RANGE <= insert_pcid;
@@ -176,7 +176,7 @@ always @(posedge clk) begin
                 end else begin
                     plru[insert_set][1] = !plru[insert_set][1];
                     plru[insert_set][4] = !plru[insert_set][4];
-                    
+
                     if (plru[insert_set][4]) begin
                         entries[insert_set][3]`TAG_RANGE  <= insert_tag;
                         entries[insert_set][3]`PCID_RANGE <= insert_pcid;

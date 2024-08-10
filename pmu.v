@@ -36,20 +36,20 @@ if (prev_state_reg[dir_bit] == 1'b0 && f_signal == 1'b1)\
 always @(posedge clk) begin
 
     if (prev_state_reg[0] == 1'b0 && tlb_hit == 1'b1)
-        dTLB_hit <= dTLB_hit + 1'b1;     
+        dTLB_hit <= dTLB_hit + 1'b1;
     prev_state_reg[0] <= tlb_hit;
 
     if (prev_state_reg[1] == 1'b0 && tlb_miss == 1'b1)
-        dTLB_miss <= dTLB_miss + 1'b1;     
+        dTLB_miss <= dTLB_miss + 1'b1;
     prev_state_reg[1] <= tlb_miss;
 
     if (prev_state_reg[2] == 1'b0 && tlb_prefetch == 1'b1)
-        dTLB_prefetch <= dTLB_prefetch + 1'b1;   
+        dTLB_prefetch <= dTLB_prefetch + 1'b1;
     prev_state_reg[2] <= tlb_prefetch;
 
     `GEN_STAT(3, stlb_hit, STLB_hit)
     `GEN_STAT(4, stlb_miss, STLB_miss)
     `GEN_STAT(5, stlb_prefetch, STLB_prefetch)
 end
-    
+
 endmodule
