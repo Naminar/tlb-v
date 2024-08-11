@@ -12,14 +12,14 @@ module TLB
 (
     input clk,
     input [`STATE_RANGE] state,
-    // input shutdown,                     //   clear tlb
-    // input insert,                       //   forcibly insert PTE
-    input  [SADDR-1:0] req_va,        // virtual address
-    input  [SPCID-1:0] req_pcid,      // process-context identifier
-    input  [SADDR-1:0] insert_va,        // virtual address
-    input  [SADDR-1:0] insert_pa,        // physical address
-    input  [SPCID-1:0] insert_pcid,      // process-context identifier
-    output reg [SADDR-1:0] req_ta,    // translated address
+    // input shutdown,                      //   clear tlb
+    // input insert,                        //   forcibly insert PTE
+    input  [SADDR-1:0] req_va,      // virtual address
+    input  [SPCID-1:0] req_pcid,    // process-context identifier
+    input  [SADDR-1:0] insert_va,   // virtual address
+    input  [SADDR-1:0] insert_pa,   // physical address
+    input  [SPCID-1:0] insert_pcid, // process-context identifier
+    output reg [SADDR-1:0] req_ta,  // translated address
     output reg hit,
     output reg miss
 );
@@ -39,11 +39,10 @@ wire [SPAGE-1:0]                    insert_local_addr   = insert_va[SPAGE-1:0];
 wire [$clog2(NSET)-1:0]             insert_set          = insert_va[SPAGE+$clog2(NSET)-1:SPAGE];
 wire [SADDR-1-SPAGE-$clog2(NSET):0] insert_tag          = insert_va[SADDR-1:SPAGE+$clog2(NSET)];
 
-// reg [`STATE_RANGE] state;
 reg [NWAY-2:0] plru [NSET-1:0];
 reg [SADDR-1:0] prev_addr = 0;
 reg [SPCID-1:0] prev_pcid = 0;
-// include valid bit, but didn't used.
+// include valid bit, but didn't use it.
 reg [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE:0] entries [NSET-1:0][NWAY-1:0];
 
 // assign out_state = state;
@@ -52,7 +51,6 @@ initial begin: init_plru_and_entries
     integer  w_ind, s_ind, a;
     hit = 0;
     miss = 0;
-    // state[`STATE_RANGE] = state_waiting;
 
     for (a = 0; a < NSET; a = a + 1)
         plru[a] = 0;
@@ -70,35 +68,24 @@ end
 /********************************************************************
                              PIPELINE MACHINE
 ********************************************************************/
-genvar s_ind;
-generate
-    for (s_ind = 0; s_ind < NSET; s_ind = s_ind + 1) begin: clear
-        always @(posedge clk) begin: shutdown_stlb
-            if (state == state_shutdown) begin: shutdown_tlb
-                integer  w_ind;
-                for (w_ind = 0; w_ind < NWAY; w_ind = w_ind + 1) begin
-                    entries[s_ind][w_ind]`VALIDE_BIT    <= 0;
-                    entries[s_ind][w_ind]`TAG_RANGE     <= 0;
-                    entries[s_ind][w_ind]`PCID_RANGE    <= 0;
-                    entries[s_ind][w_ind]`PA_RANGE      <= 0;
-                end
-            end
-        end
-    end
-endgenerate
+// genvar s_ind;
+// generate
+//     for (s_ind = 0; s_ind < NSET; s_ind = s_ind + 1) begin: clear
+//         always @(posedge clk) begin: shutdown_stlb
+//             if (state == state_shutdown) begin: shutdown_tlb
+//                 integer  w_ind;
+//                 for (w_ind = 0; w_ind < NWAY; w_ind = w_ind + 1) begin
+//                     entries[s_ind][w_ind]`VALIDE_BIT    <= 0;
+//                     entries[s_ind][w_ind]`TAG_RANGE     <= 0;
+//                     entries[s_ind][w_ind]`PCID_RANGE    <= 0;
+//                     entries[s_ind][w_ind]`PA_RANGE      <= 0;
+//                 end
+//             end
+//         end
+//     end
+// endgenerate
 
 always @(posedge clk) begin
-    // if (state != state_shutdown && ( prev_addr != va || pcid != prev_pcid)) begin
-    //    state <= state_req;
-    //    prev_addr <= va;
-    //    prev_pcid <= pcid;
-    // end else if (shutdown != 0) begin
-    //     state <= state_shutdown;
-    // end else if (insert != 0) begin
-    //     state <= state_insert;
-    // end
-
-    // case (state)
 
         if ((state & state_req) == state_waiting) begin
             miss <= 0;
@@ -109,7 +96,6 @@ always @(posedge clk) begin
             req_ta[SPAGE-1:0] <= req_local_addr;
             hit <= 1'b1;
             miss <= 1'b0;
-            // state <= state_waiting;
 
             if(entries[req_set][0]`TAG_RANGE == req_tag && entries[req_set][0]`PCID_RANGE == req_pcid) begin
                 plru[req_set] = new_plru(plru[req_set], 7'b0001011, 7'b0000000);
@@ -148,9 +134,6 @@ always @(posedge clk) begin
             end else begin
                 miss <= 1'b1;
                 hit <= 1'b0;
-                // state <= state_miss;
-                // state <= state & ~state_req;
-                // state <= state | state_miss;
             end
         // end state_req
         end
@@ -224,16 +207,13 @@ always @(posedge clk) begin
                     end
                 end
             end
-            // state <= state_waiting;
         // end state_insert
         end
 
-        if ((state & state_shutdown) == state_shutdown) begin
-            // another always block: line 66
-            // state <= state_waiting;
-        // end state_shutdown
-        end
-        // default: ;
-    // endcase
+        // if ((state & state_shutdown) == state_shutdown) begin
+        //     // another always block: line 66
+        //     // state <= state_waiting;
+        // // end state_shutdown
+        // end
 end
 endmodule

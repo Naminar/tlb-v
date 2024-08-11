@@ -48,8 +48,6 @@
     output reg [SADDR-1:0] req_ta_``bank,  \
     output reg hit_``bank,             \
     output reg miss_``bank
-    
-    // output reg [`STATE_RANGE] state_``bank
 
 `define SECTION_INIT(bank)                                                                                  \
 wire [SPAGE-1:0]                    req_local_addr_``bank      = req_va_``bank[SPAGE-1:0];                  \
@@ -58,10 +56,6 @@ wire [SADDR-1-SPAGE-$clog2(NSET):0] req_tag_``bank             = req_va_``bank[S
 /*wire [SPAGE-1:0]                    insert_local_addr_``bank      = req_va_``bank[SPAGE-1:0];*/                  \
 wire [$clog2(NSET)-1:0]             insert_set_``bank             = insert_va_``bank[SPAGE+$clog2(NSET)-1:SPAGE]; \
 wire [SADDR-1-SPAGE-$clog2(NSET):0] insert_tag_``bank             = insert_va_``bank[SADDR-1:SPAGE+$clog2(NSET)];
-
-// assign local_addr_``bank      = va_``bank[SPAGE-1:0];                  \
-// assign set_``bank             = va_``bank[SPAGE+$clog2(NSET)-1:SPAGE]; \
-// assign tag_``bank             = va_``bank[SADDR-1:SPAGE+$clog2(NSET)];
 
 module STLB
 #(
@@ -99,10 +93,6 @@ reg [SADDR-$clog2(NSET)-SPAGE+SPCID+SADDR-SPAGE:0] entries [NSET-1:0][NWAY-1:0];
 
 initial begin: init_plru_and_entries
     integer  w_ind, s_ind;
-    // state_bank0[`STATE_RANGE] = state_waiting;
-    // state_bank1[`STATE_RANGE] = state_waiting;
-    // state_bank2[`STATE_RANGE] = state_waiting;
-    // state_bank3[`STATE_RANGE] = state_waiting;
 
     for (s_ind = 0; s_ind < NSET; s_ind = s_ind + 1) begin
         for (w_ind = 0; w_ind < NWAY; w_ind = w_ind + 1) begin
