@@ -6,7 +6,7 @@ FOLDER=build
 
 cmp:
 	if test -d $(FOLDER); then echo ; else mkdir $(FOLDER); fi
-	iverilog -o $(FOLDER)/$(TLB) $(TLB)_tb.v stlb.v $(TLB).v  $(WAY).v $(PMU).v mmu.v
+	iverilog -o $(FOLDER)/$(TLB) $(TLB)_tb.v stlb.v $(TLB).v $(PMU).v mmu.v
 	./$(FOLDER)/$(TLB)
 	mv $(TLB)_tb.vcd $(FOLDER)/
 

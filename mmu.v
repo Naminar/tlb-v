@@ -12,9 +12,9 @@ module MMU
     input [11:0] pcid,
     output reg [63:0] ta
 );
-    wire tlb_hit;
+    wire dtlb_hit;
     wire stlb_hit;
-    wire tlb_miss;
+    wire dtlb_miss;
     wire stlb_miss;
     wire [63:0] stat_hit;
     wire [63:0] stat_miss;
@@ -27,35 +27,38 @@ module MMU
 
     parameter SADDR=64;
     parameter SPCID=12;
-    wire  [SADDR-1:0] tlb_req_va;
-    wire  [SPCID-1:0] tlb_req_pcid;
-    wire  [SADDR-1:0] tlb_insert_va;
-    wire  [SADDR-1:0] tlb_insert_pa;
-    wire  [SPCID-1:0] tlb_insert_pcid;
-    wire  [SADDR-1:0] tlb_req_ta;
-    reg [`STATE_RANGE] tlb_state  = {{5{1'b0}}, 1'b1};
-    reg [`STATE_RANGE] stlb_state = {{5{1'b0}}, 1'b0};
+
+    reg     [SADDR-1:0] dtlb_req_va     = {SADDR{1'b0}};
+    reg     [SPCID-1:0] dtlb_req_pcid   = {SADDR{1'b0}};
+    wire    [SADDR-1:0] dtlb_req_ta;
+    reg     [`STATE_RANGE] dtlb_state   = {{5{1'b0}}, 1'b1};
+
+    reg     [SADDR-1:0] itlb_req_va     = {SADDR{1'b0}};
+    reg     [SPCID-1:0] itlb_req_pcid   = {SADDR{1'b0}};
+    wire    [SADDR-1:0] itlb_req_ta;
+    reg     [`STATE_RANGE] itlb_state   = {{6{1'b0}}};
 
     wire  [SADDR-1:0] stlb_req_ta;
+    reg [`STATE_RANGE] stlb_state = {{5{1'b0}}, 1'b0};
 
     TLB dtlb(// inputs
-            .clk(clk), .state(tlb_state), .req_va(tlb_req_va), .req_pcid(tlb_req_pcid),
-            .insert_va(tlb_insert_va), .insert_pa(tlb_insert_pa), .insert_pcid(tlb_insert_pcid),
+            .clk(clk), .state(dtlb_state), .req_va(dtlb_req_va), .req_pcid(dtlb_req_pcid),
+            .insert_va(stlb_piping_va[3]), .insert_pa(stlb_piping_pa[3]), .insert_pcid(stlb_piping_pcid[3]),
             // outputs
-            .req_ta(tlb_req_ta), .hit(tlb_hit), .miss(tlb_miss));
+            .req_ta(dtlb_req_ta), .hit(dtlb_hit), .miss(dtlb_miss));
 
     TLB itlb(// inputs
-            .clk(clk), .state(tlb_state), .req_va(tlb_req_va), .req_pcid(tlb_req_pcid),
-            .insert_va(tlb_insert_va), .insert_pa(tlb_insert_pa), .insert_pcid(tlb_insert_pcid),
+            .clk(clk), .state(itlb_state), .req_va(itlb_req_va), .req_pcid(itlb_req_pcid),
+            .insert_va(stlb_piping_va[3]), .insert_pa(stlb_piping_pa[3]), .insert_pcid(stlb_piping_pcid[3]),
             // outputs
-            .req_ta(tlb_req_ta), .hit(tlb_hit), .miss(tlb_miss));
+            .req_ta(itlb_req_ta), .hit(itlb_hit), .miss(itlb_miss));
 
-    // PMU pmu(clk, tlb_hit, tlb_miss, tlb_insert, stlb_hit, stlb_miss, stlb_insert, stat_hit, stat_miss, stat_prefetch);
+    // PMU pmu(clk, dtlb_hit, dtlb_miss, tlb_insert, stlb_hit, stlb_miss, stlb_insert, stat_hit, stat_miss, stat_prefetch);
 
     STLB stlb(// inputs
               .clk(clk),
-              .state_bank0(stlb_state), .req_va_bank0(piping_va[1]), .req_pcid_bank0(piping_pcid[1]),
-              .insert_va_bank0(piping_va[3]), .insert_pa_bank0(piping_pa[3]), .insert_pcid_bank0(piping_pcid[3]),
+              .state_bank0(stlb_state), .req_va_bank0(stlb_piping_va[1]), .req_pcid_bank0(stlb_piping_pcid[1]),
+              .insert_va_bank0(stlb_piping_va[3]), .insert_pa_bank0(stlb_piping_pa[3]), .insert_pcid_bank0(stlb_piping_pcid[3]),
               //outputs
               .req_ta_bank0(stlb_req_ta), .hit_bank0(stlb_hit), .miss_bank0(stlb_miss));
 
@@ -63,84 +66,116 @@ module MMU
                              PIPELINE MACHINE
 ********************************************************************/
 
-    reg [SADDR-1:0] piping_va   [5:0];      // virtual address
-    reg [SADDR-1:0] piping_pa   [5:0];      // physical address
-    reg [SPCID-1:0] piping_pcid [5:0];      // process-context identifier
-    reg [SADDR-1:0] piping_ta   [5:0];      // translated address
+    reg [SADDR-1:0] stlb_piping_va   [5:0];      // virtual address
+    reg [SADDR-1:0] stlb_piping_pa   [5:0];      // physical address
+    reg [SPCID-1:0] stlb_piping_pcid [5:0];      // process-context identifier
+    // reg [SADDR-1:0] stlb_piping_ta   [5:0];   // translated address
+    // 1'b1 = instruction; 1'b0 = data
+    reg [3:1] piping_marker;                     // iTLB or dTLB info
 
-    reg [SADDR-1:0] inter_piping_va;
-    reg [SADDR-1:0] inter_piping_pa;
-    reg [SPCID-1:0] inter_piping_pcid;
-    reg [SADDR-1:0] inter_piping_ta;
+    reg [SADDR-1:0] incoming_dtlb_va;
+    reg [SADDR-1:0] incoming_dtlb_pa;
+    reg [SPCID-1:0] incoming_dtlb_pcid;
+
+    reg [SADDR-1:0] incoming_itlb_va;
+    reg [SADDR-1:0] incoming_itlb_pa;
+    reg [SPCID-1:0] incoming_itlb_pcid;
 
 /* verilator lint_off STMTDLY */
     initial begin
-    inter_piping_va = 64'hfffffffffffffff1;
-    inter_piping_pcid = 12'b0;
-    inter_piping_pa = 64'hfffffffffffffff1;
-    #2
-    inter_piping_va =  64'h0;
-    inter_piping_pcid = 12'b0;
-    inter_piping_pa = 64'h0;
+    incoming_dtlb_va = 64'hfffffffffffffff1;
+    incoming_dtlb_pcid = 12'b0;
+    incoming_dtlb_pa = 64'hfffffffffffffff1;
+
+    incoming_itlb_va = 64'haabbfffffffffff1;
+    incoming_itlb_pcid = 12'b0;
+    incoming_itlb_pa = 64'haabbfffffffffff1;
     #6
-    inter_piping_va = 64'hfffffffffffffff1;
-    inter_piping_pcid = 12'b0;
-    inter_piping_pa = 64'hfffffffffffffff1;
-    #2
-    inter_piping_va =  64'h1;
-    inter_piping_pcid = 12'b0;
-    inter_piping_pa = 64'h1;
+    incoming_dtlb_va =  64'h0;
+    incoming_dtlb_pcid = 12'b0;
+    incoming_dtlb_pa = 64'h0;
+    #6
+    incoming_dtlb_va = 64'hfffffffffffffff1;
+    incoming_dtlb_pcid = 12'b0;
+    incoming_dtlb_pa = 64'hfffffffffffffff1;
+    #4
+    incoming_dtlb_va =  64'h1;
+    incoming_dtlb_pcid = 12'b0;
+    incoming_dtlb_pa = 64'h1;
     end
 /* verilator lint_off STMTDLY */
 
-    reg [SADDR-1:0] prev_va = 0;
-    reg [SPCID-1:0] prev_pcid = 0;
+    reg [SADDR-1:0] pre_pipe_dtlb_pa;
+    reg [SADDR-1:0] pre_pipe_itlb_pa;
+    reg need_resolve_conflict = 1'b0;
 
-    assign  tlb_req_va      = piping_va[0];
-    assign  tlb_req_pcid    = piping_pcid[0];
-    assign  tlb_insert_va   = piping_va[3];
-    assign  tlb_insert_pa   = piping_pa[3];
-    assign  tlb_insert_pcid = piping_pcid[3];
-
-    // wire lock_bank0; // connect with outputs state of banks and request signal.
-    // wire lock_bank1;
-    // wire lock_bank2;
-    // wire lock_bank3;
-
-    // reg [`STATE_RANGE] stlb_state_bank0;
-    // reg [`STATE_RANGE] stlb_state_bank1;
-    // reg [`STATE_RANGE] stlb_state_bank2;
+    wire miss_conflict = (itlb_miss & dtlb_miss)? 1'b1 : 1'b0;
+    // wire previous_req_is_instruction = piping_marker[1];
 
     always @(negedge clk) begin
 
+        need_resolve_conflict <= miss_conflict;
         /* -------------- TLB PIPELINE -------------- */
-        if (piping_va[0] != inter_piping_va || piping_pcid[0] != inter_piping_pcid) begin
-            tlb_state`req_bit <= 1'b1;
-        end else if (tlb_hit || tlb_miss) begin
-            tlb_state`req_bit <= 1'b0;
-        end
 
-        if (tlb_miss) begin
-            stlb_state`req_bit <= 1'b1;
-        end
+            if (dtlb_req_va != incoming_dtlb_va || dtlb_req_pcid != incoming_dtlb_pcid || need_resolve_conflict) begin
+                dtlb_state`req_bit <= 1'b1;
+            end else if (dtlb_hit || dtlb_miss) begin
+                dtlb_state`req_bit <= 1'b0;
+            end
 
-        if (tlb_state`insert_bit == 1'b1) begin
-            tlb_state`insert_bit <= 1'b0;
-        end
+            if (itlb_req_va != incoming_itlb_va || itlb_req_pcid != incoming_itlb_pcid) begin
+                itlb_state`req_bit <= 1'b1;
+            end else if (itlb_hit || itlb_miss) begin
+                itlb_state`req_bit <= 1'b0;
+            end
+        if (~itlb_miss) begin
 
-        if (tlb_hit) begin
-            // piping_ta[0] = tlb_req_ta;
-            ta <= tlb_req_ta;
-        end
+            if (dtlb_hit) begin
+                // stlb_piping_ta[0] = dtlb_req_ta;
+                ta <= dtlb_req_ta;
+            end
 
-        if (tlb_miss) begin
-            tlb_state`miss_bit <= 1'b1;
-        end else if (tlb_state`miss_bit == 1'b1) begin
-            tlb_state`miss_bit <= 1'b0;
+            if (dtlb_miss) begin
+                dtlb_state`miss_bit <= 1'b1;
+            end else if (dtlb_state`miss_bit == 1'b1) begin
+                dtlb_state`miss_bit <= 1'b0;
+            end
+        end else begin
+
+            if (itlb_hit) begin
+                // stlb_piping_ta[0] = dtlb_req_ta;
+                ta <= dtlb_req_ta;
+            end
+
+            if (itlb_miss) begin
+                itlb_state`miss_bit <= 1'b1;
+            end else if (itlb_state`miss_bit == 1'b1) begin
+                itlb_state`miss_bit <= 1'b0;
+            end
         end
+        //------------------------------------------
+        // if (dtlb_miss) begin
+        //     stlb_state`req_bit <= 1'b1;
+        // end
+
+        // if (itlb_miss) begin
+        //     itlb_state`req_bit <= 1'b1;
+        // end
+        //------------------------------------------
+        // if (dtlb_state`insert_bit == 1'b1) begin
+        //     dtlb_state`insert_bit <= 1'b0;
+        // end
+
+        // if (itlb_state`insert_bit == 1'b1) begin
+        //     itlb_state`insert_bit <= 1'b0;
+        // end
+        //------------------------------------------
+
+        //------------------------------------------
+        // Possible to delete this stage completle.
 
         /* -------------- STLB PIPELINE -------------- */
-        if (tlb_miss) begin
+        if (dtlb_miss || itlb_miss) begin
             stlb_state`req_bit <= 1'b1;
         end else if (stlb_hit || stlb_miss) begin
             stlb_state`req_bit <= 1'b0;
@@ -151,12 +186,25 @@ module MMU
         end
 
         if (stlb_hit) begin
-            ta <= tlb_req_ta;
+            ta <= dtlb_req_ta;
         end
 
         if (stlb_state`miss_bit == 1'b1) begin
-            tlb_state`insert_bit  <= 1'b1;
             stlb_state`insert_bit <= 1'b1;
+
+            if (piping_marker[2]) begin
+                itlb_state`insert_bit  <= 1'b1;
+
+                if (dtlb_state`insert_bit == 1'b1) begin
+                    dtlb_state`insert_bit <= 1'b0;
+                end
+            end else begin
+                dtlb_state`insert_bit  <= 1'b1;
+
+                if (itlb_state`insert_bit == 1'b1) begin
+                    itlb_state`insert_bit <= 1'b0;
+                end
+            end
         end
 
         if (stlb_miss) begin
@@ -166,34 +214,41 @@ module MMU
         end
 
         /* -------------- DATA PIPING -------------- */
-        piping_va[5] <= piping_va[4];
-        piping_va[4] <= piping_va[3];
-        piping_va[3] <= piping_va[2];
-        piping_va[2] <= piping_va[1];
-        piping_va[1] <= piping_va[0];
-        piping_va[0] <= inter_piping_va;
 
-        piping_pa[5] <= piping_pa[4];
-        piping_pa[4] <= piping_pa[3];
-        piping_pa[3] <= piping_pa[2];
-        piping_pa[2] <= piping_pa[1];
-        piping_pa[1] <= piping_pa[0];
-        piping_pa[0] <= inter_piping_pa;
+        piping_marker <= piping_marker << 1'b1;
+        if (itlb_miss) begin
+            stlb_piping_va[1] <= itlb_req_va; //stlb_piping_va[0];
+            stlb_piping_pa[1] <= pre_pipe_itlb_pa;
+            stlb_piping_pcid[1] <= itlb_req_pcid;
+            piping_marker[1] <= 1'b1;
+        end else begin
+            stlb_piping_va[1] <= dtlb_req_va;
+            stlb_piping_pa[1] <= pre_pipe_dtlb_pa;
+            stlb_piping_pcid[1] <= dtlb_req_pcid; //stlb_piping_pcid[0];
+            piping_marker[1] <= 1'b0;
+        end
+        itlb_req_va <= incoming_itlb_va;
+        pre_pipe_itlb_pa <= incoming_itlb_pa;
+        itlb_req_pcid <= incoming_itlb_pcid;
+        dtlb_req_va <= incoming_dtlb_va;
+        pre_pipe_dtlb_pa <= incoming_dtlb_pa;
+        dtlb_req_pcid <= incoming_dtlb_pcid;
+        // stlb_piping_va[0] <= incoming_dtlb_va;
+        //------------------------------------------
+        stlb_piping_va[3] <= stlb_piping_va[2];
+        stlb_piping_va[2] <= stlb_piping_va[1];
 
+        stlb_piping_pa[3] <= stlb_piping_pa[2];
+        stlb_piping_pa[2] <= stlb_piping_pa[1];
 
-        piping_pcid[5] <= piping_pcid[4];
-        piping_pcid[4] <= piping_pcid[3];
-        piping_pcid[3] <= piping_pcid[2];
-        piping_pcid[2] <= piping_pcid[1];
-        piping_pcid[1] <= piping_pcid[0];
-        piping_pcid[0] <= inter_piping_pcid;
+        //------------------------------------------
+        stlb_piping_pcid[3] <= stlb_piping_pcid[2];
+        stlb_piping_pcid[2] <= stlb_piping_pcid[1];
 
-        piping_ta[5] <= piping_ta[4];
-        piping_ta[4] <= piping_ta[3];
-        piping_ta[3] <= piping_ta[2];
-        piping_ta[2] <= piping_ta[1];
-        piping_ta[1] <= piping_ta[0];
-        piping_ta[0] <= {SADDR{1'bz}};
+        // stlb_piping_ta[3] <= stlb_piping_ta[2];
+        // stlb_piping_ta[2] <= stlb_piping_ta[1];
+        // stlb_piping_ta[1] <= stlb_piping_ta[0];
+        // stlb_piping_ta[0] <= {SADDR{1'bz}};
     end
 
 endmodule
