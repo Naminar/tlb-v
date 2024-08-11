@@ -1,8 +1,13 @@
 `define STATE_MACHINE(bank)                                                                     \
 always @(posedge clk) begin                                                                     \
-    if (request_``bank) begin                                                                   \
+    if ((state_``bank & state_req) == state_waiting) begin\
+        hit_``bank  <= 1'b0;        \
+        miss_``bank <= 1'b0;        \
+    end                             \
+                                     \
+    if ((state_``bank & state_req) == state_req) begin                                      \
             hit_``bank <= 1'b1;                                                                 \
-            state_``bank <= state_waiting;                                                      \
+            miss_``bank <= 1'b0;/* state_``bank <= state_waiting;*/                              \
             `WAY_CHECK(bank, 0, 2'b00, plru_reg_1, 3'b011, 3'b000)                              \
             `WAY_CHECK(bank, 1, 2'b00, plru_reg_1, 3'b011, 3'b010)                              \
             `WAY_CHECK(bank, 2, 2'b00, plru_reg_1, 3'b101, 3'b001)                              \
@@ -20,17 +25,17 @@ always @(posedge clk) begin                                                     
             begin                                                                               \
                 miss_``bank <= 1'b1;                                                            \
                 hit_``bank <= 1'b0;                                                             \
-                state_``bank <= state_miss;                                                     \
+                /* state_``bank <= state_miss;*/                                                \
             end                                                                                 \
         end                                                                                     \
-    case (state_``bank)                                                                         \
-        state_miss: begin                                                                       \
+                                                                             \
+        if ((state_``bank & state_miss) == state_miss)  begin                                                                       \
             miss_``bank <= 1'b0;                                                                \
-            ta_``bank[SADDR-1:0] <= {pa_``bank[SADDR-1:SPAGE], local_addr_``bank};              \
-            state_``bank <= state_insert;                                                       \
+            /* ta_``bank[SADDR-1:0] <= {pa_``bank[SADDR-1:SPAGE], local_addr_``bank};*/              \
+            /*state_``bank <= state_insert;*/                                                       \
         end                                                                                     \
-        state_insert: begin                                                                     \
-            case (mru_top_reg[set_``bank])                                                      \
+        if ((state_``bank & state_insert) == state_insert) begin                                                                     \
+            case (mru_top_reg[insert_set_``bank])                                                      \
                 2'b00: begin                                                                    \
                     `TREE_INVERS(bank, plru_reg_2, 1)                                           \
                 end                                                                             \
@@ -42,15 +47,15 @@ always @(posedge clk) begin                                                     
                 end                                                                             \
                 default:;                                                                       \
             endcase                                                                             \
-            if(mru_top_reg[set_``bank] == 2'b10)                                                \
-                mru_top_reg[set_``bank] <= 2'b00;                                               \
+            if(mru_top_reg[insert_set_``bank] == 2'b10)                                                \
+                mru_top_reg[insert_set_``bank] <= 2'b00;                                               \
             else                                                                                \
-                mru_top_reg[set_``bank] <= mru_top_reg[set_``bank] + 1'b1;                      \
-            state_``bank <= state_waiting;                                                      \
+                mru_top_reg[insert_set_``bank] <= mru_top_reg[insert_set_``bank] + 1'b1;                      \
+            /*state_``bank <= state_waiting;*/                                                      \
         end                                                                                     \
-        state_shutdown: begin                                                                   \
-            state_``bank <= state_waiting;                                                      \
-        end                                                                                     \
-        default: ;                                                                              \
-    endcase                                                                                     \
+        /*if ((state_``bank & state_shutdown) == state_shutdown) begin */                                                                  \
+            /*state_``bank <= state_waiting;*/                                                      \
+        /*end*/                                                                                     \
+                                                                                      \
+                                                                                         \
 end

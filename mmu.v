@@ -33,16 +33,23 @@ module MMU
     wire  [SADDR-1:0] tlb_insert_pa;
     wire  [SPCID-1:0] tlb_insert_pcid;
     wire  [SADDR-1:0] tlb_req_ta;
-    reg [`STATE_RANGE] tlb_state = 6'b000001;
-    reg [`STATE_RANGE] stlb_state = 6'b000001;
+    reg [`STATE_RANGE] tlb_state  = {{5{1'b0}}, 1'b1};
+    reg [`STATE_RANGE] stlb_state = {{5{1'b0}}, 1'b0};
 
+    wire  [SADDR-1:0] stlb_req_ta;
 
-    TLB tlb(clk, tlb_state, tlb_req_va, tlb_req_pcid,
-                tlb_insert_va, tlb_insert_pa, tlb_insert_pcid,
-                // outputs
-                tlb_req_ta, tlb_hit, tlb_miss);
+    TLB tlb(// inputs
+            .clk(clk), .state(tlb_state), .req_va(tlb_req_va), .req_pcid(tlb_req_pcid),
+            .insert_va(tlb_insert_va), .insert_pa(tlb_insert_pa), .insert_pcid(tlb_insert_pcid),
+            // outputs
+            .req_ta(tlb_req_ta), .hit(tlb_hit), .miss(tlb_miss));
     // PMU pmu(clk, tlb_hit, tlb_miss, tlb_insert, stlb_hit, stlb_miss, stlb_insert, stat_hit, stat_miss, stat_prefetch);
-    // STLB stlb(clk, tlb_miss, shutdown, stlb_insert, validate, va, pa, pcid, ta, stlb_hit, stlb_miss);
+    STLB stlb(// inputs
+              .clk(clk),
+              .state_bank0(stlb_state), .req_va_bank0(piping_va[1]), .req_pcid_bank0(piping_pcid[1]),
+              .insert_va_bank0(piping_va[3]), .insert_pa_bank0(piping_pa[3]), .insert_pcid_bank0(piping_pcid[3]), 
+              //outputs
+              .req_ta_bank0(stlb_req_ta), .hit_bank0(stlb_hit), .miss_bank0(stlb_miss));
 
 // fancy inclusion policy
     // always @(posedge clk) begin
@@ -77,15 +84,19 @@ module MMU
     initial begin
     inter_piping_va = 64'hfffffffffffffff1;
     inter_piping_pcid = 12'b0;
-    inter_piping_pa = 64'hfffffffffffffff2;
-    #4
+    inter_piping_pa = 64'hfffffffffffffff1;
+    #2
     inter_piping_va =  64'h0;
     inter_piping_pcid = 12'b0;
-    inter_piping_pa = 64'h1;
-    #4
+    inter_piping_pa = 64'h0;
+    #6
+    inter_piping_va = 64'hfffffffffffffff1;
+    inter_piping_pcid = 12'b0;
+    inter_piping_pa = 64'hfffffffffffffff1;
+    #2
     inter_piping_va =  64'h1;
     inter_piping_pcid = 12'b0;
-    inter_piping_pa = 64'h2;
+    inter_piping_pa = 64'h1;
     end
 /* verilator lint_off STMTDLY */
 
@@ -102,6 +113,10 @@ module MMU
     // wire lock_bank1;
     // wire lock_bank2;
     // wire lock_bank3;
+
+    // reg [`STATE_RANGE] stlb_state_bank0;
+    // reg [`STATE_RANGE] stlb_state_bank1;
+    // reg [`STATE_RANGE] stlb_state_bank2;
 
     always @(negedge clk) begin
         /* -------------- TLB PIPELINE -------------- */
@@ -154,6 +169,7 @@ module MMU
 
         if (stlb_state`miss_bit == 1'b1) begin
             tlb_state`insert_bit  <= 1'b1;
+            //!!!! FOR DEBUG ....... tlb_state`insert_bit  <= 1'b1;
             stlb_state`insert_bit <= 1'b1;
         end
 
