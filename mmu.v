@@ -34,7 +34,7 @@ module MMU
     reg     [SADDR-1:0] dtlb_req_va     = {SADDR{1'b0}};
     reg     [SPCID-1:0] dtlb_req_pcid   = {SADDR{1'b0}};
     wire    [SADDR-1:0] dtlb_req_ta;
-    reg     [`STATE_RANGE] dtlb_state   = {{5{1'b0}}, 1'b1};
+    reg     [`STATE_RANGE] dtlb_state   = {{5{1'b0}}, 1'b0};
 
     reg     [SADDR-1:0] itlb_req_va     = {SADDR{1'b0}};
     reg     [SPCID-1:0] itlb_req_pcid   = {SADDR{1'b0}};
@@ -94,6 +94,25 @@ module MMU
 
 /* verilator lint_off STMTDLY */
     initial begin
+    prefetch_stlb = 1'b1;
+
+    prefetching_stlb_va     = 64'haaaaaaaaaaaaaaa;
+    prefetching_stlb_pcid     = 12'b0;
+    prefetching_stlb_pa   = 64'haaaaaaaaaaaaaaa;
+
+    #2
+
+    incoming_dtlb_va = 64'h0;
+    incoming_dtlb_pcid = 12'b0;
+    incoming_dtlb_pa = 64'h0;
+
+    incoming_itlb_va = 64'h0;
+    incoming_itlb_pcid = 12'b0;
+    incoming_itlb_pa = 64'h0;
+
+    #2
+    prefetch_stlb = 1'b0;
+
     incoming_dtlb_va = 64'hfffffffffffffff1;
     incoming_dtlb_pcid = 12'b0;
     incoming_dtlb_pa = 64'hfffffffffffffff1;
@@ -121,125 +140,138 @@ module MMU
     end
 /* verilator lint_off STMTDLY */
 
-    reg [SADDR-1:0] pre_pipe_dtlb_pa;
-    reg [SADDR-1:0] pre_pipe_itlb_pa;
+    reg [SADDR-1:0] dtlb_pre_pipe_pa;
+    reg [SADDR-1:0] itlb_pre_pipe_pa;
 
-    wire miss_conflict = (itlb_miss & dtlb_miss)? 1'b1 : 1'b0;
+    wire dtlb_itlb_miss_conflict = (itlb_miss & dtlb_miss)? 1'b1 : 1'b0;
+    wire stop_itlb_miss = (itlb_miss & prefetch_stlb)? 1'b1 : 1'b0;
+    wire stop_dtlb_miss = (dtlb_miss & prefetch_stlb)? 1'b1 : 1'b0;
     assign judged_dtlb_miss = dtlb_miss & ~(itlb_miss & dtlb_miss);
 
     always @(negedge clk) begin
 
         // -------------- iTLB & dTLB STATE PIPELINE --------------
-        if (dtlb_req_va != incoming_dtlb_va || dtlb_req_pcid != incoming_dtlb_pcid || miss_conflict) begin
+        if (dtlb_req_va != incoming_dtlb_va || dtlb_req_pcid != incoming_dtlb_pcid || dtlb_itlb_miss_conflict || stop_dtlb_miss) begin
             dtlb_state`req_bit <= 1'b1;
         end else if (dtlb_hit || dtlb_miss) begin
             dtlb_state`req_bit <= 1'b0;
         end
 
-        if (itlb_req_va != incoming_itlb_va || itlb_req_pcid != incoming_itlb_pcid) begin
+        if (itlb_req_va != incoming_itlb_va || itlb_req_pcid != incoming_itlb_pcid || stop_itlb_miss) begin
             itlb_state`req_bit <= 1'b1;
         end else if (itlb_hit || itlb_miss) begin
             itlb_state`req_bit <= 1'b0;
         end
 
-        if (~itlb_miss) begin
-            // if (dtlb_hit) begin
-            //     ta <= dtlb_req_ta;
-            // end
-            if (dtlb_miss) begin
-                dtlb_state`miss_bit <= 1'b1;
-            end else if (dtlb_state`miss_bit == 1'b1) begin
-                dtlb_state`miss_bit <= 1'b0;
+        if (~prefetch_stlb) begin
+            if (~itlb_miss) begin
+                if (dtlb_miss) begin
+                    dtlb_state`miss_bit <= 1'b1;
+                end else if (dtlb_state`miss_bit == 1'b1) begin
+                    dtlb_state`miss_bit <= 1'b0;
+                end
             end
-        end
-        // end else begin
-        //     if (itlb_hit) begin
-        //         ta <= dtlb_req_ta;
-        //     end
-        // end
 
-        if (itlb_miss) begin
-            itlb_state`miss_bit <= 1'b1;
-        end else if (itlb_state`miss_bit == 1'b1) begin
-            itlb_state`miss_bit <= 1'b0;
-        end
+            if (itlb_miss) begin
+                itlb_state`miss_bit <= 1'b1;
+            end else if (itlb_state`miss_bit == 1'b1) begin
+                itlb_state`miss_bit <= 1'b0;
+            end
 
-        // -------------- INSERT RESET --------------
-        if (dtlb_state`insert_bit == 1'b1 && stlb_state`miss_bit == 1'b0) begin
-            dtlb_state`insert_bit <= 1'b0;
-        end
+            // -------------- INSERT RESET --------------
+            if (dtlb_state`insert_bit == 1'b1 && stlb_state`miss_bit == 1'b0) begin
+                dtlb_state`insert_bit <= 1'b0;
+            end
 
-        if (itlb_state`insert_bit == 1'b1 && stlb_state`miss_bit == 1'b0) begin
-            itlb_state`insert_bit <= 1'b0;
-        end
+            if (itlb_state`insert_bit == 1'b1 && stlb_state`miss_bit == 1'b0) begin
+                itlb_state`insert_bit <= 1'b0;
+            end
 
-        // -------------- STLB STATE PIPELINE --------------
-        if (dtlb_miss || itlb_miss) begin
-            stlb_state`req_bit <= 1'b1;
-        end else if (stlb_hit || stlb_miss) begin
-            stlb_state`req_bit <= 1'b0;
-        end
+            // -------------- STLB STATE PIPELINE --------------
+            if (dtlb_miss || itlb_miss) begin
+                stlb_state`req_bit <= 1'b1;
+            end else if (stlb_hit || stlb_miss) begin
+                stlb_state`req_bit <= 1'b0;
+            end
 
-        if (stlb_state`insert_bit == 1'b1) begin
-            stlb_state`insert_bit <= 1'b0;
-        end
+            if (stlb_state`insert_bit == 1'b1) begin
+                stlb_state`insert_bit <= 1'b0;
+            end
 
-        // TODO: trigger dtlb and itlb insertions
-        if (stlb_hit) begin
-            ta <= dtlb_req_ta;
-        end
+            if (stlb_hit) begin
+                ta <= dtlb_req_ta;
+            end
 
-        if (stlb_state`miss_bit == 1'b1) begin
-            stlb_state`insert_bit <= 1'b1;
+            // TODO: trigger dtlb and itlb insertions
+            if (stlb_state`miss_bit == 1'b1) begin
+                stlb_state`insert_bit <= 1'b1;
 
-            if (piping_marker[2]) begin
-                itlb_state`insert_bit  <= 1'b1;
+                if (piping_marker[2]) begin
+                    itlb_state`insert_bit  <= 1'b1;
+                end else begin
+                    dtlb_state`insert_bit  <= 1'b1;
+                end
+            end
+
+            if (stlb_miss) begin
+                stlb_state`miss_bit <= 1'b1;
+            end else if (stlb_state`miss_bit == 1'b1) begin
+                stlb_state`miss_bit <= 1'b0;
+            end
+
+            // -------------- DATA PIPING --------------
+            piping_marker <= piping_marker << 1'b1;
+            if (itlb_miss) begin
+                stlb_piping_va[1]   <= itlb_req_va;
+                stlb_piping_pa[1]   <= itlb_pre_pipe_pa;
+                stlb_piping_pcid[1] <= itlb_req_pcid;
+                piping_marker[1]    <= 1'b1;
             end else begin
-                dtlb_state`insert_bit  <= 1'b1;
+                stlb_piping_va[1]   <= dtlb_req_va;
+                stlb_piping_pa[1]   <= dtlb_pre_pipe_pa;
+                stlb_piping_pcid[1] <= dtlb_req_pcid;
+                piping_marker[1]    <= 1'b0;
             end
-        end
 
-        if (stlb_miss) begin
-            stlb_state`miss_bit <= 1'b1;
-        end else if (stlb_state`miss_bit == 1'b1) begin
-            stlb_state`miss_bit <= 1'b0;
-        end
+            itlb_req_va         <= incoming_itlb_va;
+            itlb_pre_pipe_pa    <= incoming_itlb_pa;
+            itlb_req_pcid       <= incoming_itlb_pcid;
+            //------------------------------------------
+            dtlb_req_va         <= incoming_dtlb_va;
+            dtlb_pre_pipe_pa    <= incoming_dtlb_pa;
+            dtlb_req_pcid       <= incoming_dtlb_pcid;
+            //------------------------------------------
+            stlb_piping_va[3] <= stlb_piping_va[2];
+            stlb_piping_va[2] <= stlb_piping_va[1];
+            //------------------------------------------
+            stlb_piping_pa[3] <= stlb_piping_pa[2];
+            stlb_piping_pa[2] <= stlb_piping_pa[1];
+            //------------------------------------------
+            stlb_piping_pcid[3] <= stlb_piping_pcid[2];
+            stlb_piping_pcid[2] <= stlb_piping_pcid[1];
 
-        // -------------- DATA PIPING --------------
-        piping_marker <= piping_marker << 1'b1;
-        if (itlb_miss) begin
-            stlb_piping_va[1]   <= itlb_req_va;
-            stlb_piping_pa[1]   <= pre_pipe_itlb_pa;
-            stlb_piping_pcid[1] <= itlb_req_pcid;
-            piping_marker[1]    <= 1'b1;
+            // stlb_piping_ta[3] <= stlb_piping_ta[2];
+            // stlb_piping_ta[2] <= stlb_piping_ta[1];
+            // stlb_piping_ta[1] <= stlb_piping_ta[0];
+            // stlb_piping_ta[0] <= {SADDR{1'bz}};
         end else begin
-            stlb_piping_va[1]   <= dtlb_req_va;
-            stlb_piping_pa[1]   <= pre_pipe_dtlb_pa;
-            stlb_piping_pcid[1] <= dtlb_req_pcid;
-            piping_marker[1]    <= 1'b0;
+            dtlb_state`insert_bit <= 1'b0;
+            itlb_state`insert_bit <= 1'b0;
+            stlb_state`insert_bit <= 1'b1;
+            //------------------------------------------
+            stlb_piping_va[3]   <= prefetching_stlb_va;
+            stlb_piping_pa[3]   <= prefetching_stlb_pa;
+            stlb_piping_pcid[3] <= prefetching_stlb_pcid;
+            //------------------------------------------
+            itlb_req_va         <= incoming_itlb_va;
+            itlb_pre_pipe_pa    <= incoming_itlb_pa;
+            itlb_req_pcid       <= incoming_itlb_pcid;
+            //------------------------------------------
+            dtlb_req_va         <= incoming_dtlb_va;
+            dtlb_pre_pipe_pa    <= incoming_dtlb_pa;
+            dtlb_req_pcid       <= incoming_dtlb_pcid;
         end
 
-        itlb_req_va         <= incoming_itlb_va;
-        pre_pipe_itlb_pa    <= incoming_itlb_pa;
-        itlb_req_pcid       <= incoming_itlb_pcid;
-        //------------------------------------------
-        dtlb_req_va         <= incoming_dtlb_va;
-        pre_pipe_dtlb_pa    <= incoming_dtlb_pa;
-        dtlb_req_pcid       <= incoming_dtlb_pcid;
-        //------------------------------------------
-        stlb_piping_va[3] <= stlb_piping_va[2];
-        stlb_piping_va[2] <= stlb_piping_va[1];
-        //------------------------------------------
-        stlb_piping_pa[3] <= stlb_piping_pa[2];
-        stlb_piping_pa[2] <= stlb_piping_pa[1];
-        //------------------------------------------
-        stlb_piping_pcid[3] <= stlb_piping_pcid[2];
-        stlb_piping_pcid[2] <= stlb_piping_pcid[1];
-
-        // stlb_piping_ta[3] <= stlb_piping_ta[2];
-        // stlb_piping_ta[2] <= stlb_piping_ta[1];
-        // stlb_piping_ta[1] <= stlb_piping_ta[0];
-        // stlb_piping_ta[0] <= {SADDR{1'bz}};
     end
 
 endmodule
