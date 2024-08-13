@@ -16,11 +16,11 @@ module MMU
     input [11:0] pcid,
     output reg [63:0] ta
 );
-    
-    wire dtlb_hit,  itlb_hit,  stlb_hit, 
-         dtlb_miss, itlb_miss, stlb_miss, 
+
+    wire dtlb_hit,  itlb_hit,  stlb_hit,
+         dtlb_miss, itlb_miss, stlb_miss,
          judged_dtlb_miss;
-    
+
     wire [63:0] stat_hit;
     wire [63:0] stat_miss;
     wire [63:0] stat_prefetch;
@@ -82,6 +82,16 @@ module MMU
     reg [SADDR-1:0] incoming_itlb_pa;
     reg [SPCID-1:0] incoming_itlb_pcid;
 
+    reg [SADDR-1:0] prefetching_stlb_va;
+    reg [SADDR-1:0] prefetching_stlb_pa;
+    reg [SPCID-1:0] prefetching_stlb_pcid;
+
+    reg prefetch_stlb;
+
+    wire [SADDR-1:0] itlb_ta = (dtlb_hit)? dtlb_req_ta: {SADDR{1'bx}};
+    wire [SADDR-1:0] dtlb_ta = (itlb_hit)? itlb_req_ta: {SADDR{1'bx}};
+
+
 /* verilator lint_off STMTDLY */
     initial begin
     incoming_dtlb_va = 64'hfffffffffffffff1;
@@ -91,7 +101,12 @@ module MMU
     incoming_itlb_va = 64'haabbfffffffffff1;
     incoming_itlb_pcid = 12'b0;
     incoming_itlb_pa = 64'haabbfffffffffff1;
-    #6
+
+    #2
+    incoming_itlb_va = 64'haabbccfffffffff1;
+    incoming_itlb_pcid = 12'b0;
+    incoming_itlb_pa = 64'haabbccfffffffff1;
+    #4
     incoming_dtlb_va =  64'h0;
     incoming_dtlb_pcid = 12'b0;
     incoming_dtlb_pa = 64'h0;
@@ -128,19 +143,20 @@ module MMU
         end
 
         if (~itlb_miss) begin
-            if (dtlb_hit) begin
-                ta <= dtlb_req_ta;
-            end
+            // if (dtlb_hit) begin
+            //     ta <= dtlb_req_ta;
+            // end
             if (dtlb_miss) begin
                 dtlb_state`miss_bit <= 1'b1;
             end else if (dtlb_state`miss_bit == 1'b1) begin
                 dtlb_state`miss_bit <= 1'b0;
             end
-        end else begin
-            if (itlb_hit) begin
-                ta <= dtlb_req_ta;
-            end
         end
+        // end else begin
+        //     if (itlb_hit) begin
+        //         ta <= dtlb_req_ta;
+        //     end
+        // end
 
         if (itlb_miss) begin
             itlb_state`miss_bit <= 1'b1;
@@ -168,6 +184,7 @@ module MMU
             stlb_state`insert_bit <= 1'b0;
         end
 
+        // TODO: trigger dtlb and itlb insertions
         if (stlb_hit) begin
             ta <= dtlb_req_ta;
         end

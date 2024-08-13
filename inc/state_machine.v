@@ -30,7 +30,7 @@ always @(posedge clk) begin                                                     
         end                                                                                     \
                                                                              \
         if ((state_``bank & state_miss) == state_miss)  begin                                                                       \
-            miss_``bank <= 1'b0;                                                                \
+            /*miss_``bank <= 1'b0;*/                                                                \
             /* ta_``bank[SADDR-1:0] <= {pa_``bank[SADDR-1:SPAGE], local_addr_``bank};*/              \
             /*state_``bank <= state_insert;*/                                                       \
         end                                                                                     \
