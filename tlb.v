@@ -100,37 +100,37 @@ always @(posedge clk) begin
             if(entries[req_set][0]`TAG_RANGE == req_tag && entries[req_set][0]`PCID_RANGE == req_pcid) begin
                 plru[req_set] = new_plru(plru[req_set], 7'b0001011, 7'b0000000);
                 req_ta[SADDR-1:SPAGE] <= entries[req_set][0]`PA_RANGE;
-                $display("1");
+                $display("1 %h", req_va);
 
             end else if(entries[req_set][1]`TAG_RANGE == req_tag && entries[req_set][1]`PCID_RANGE == req_pcid) begin
                 plru[req_set] = new_plru(plru[req_set], 7'b0001011, 7'b0001000);
                 req_ta[SADDR-1:SPAGE] <= entries[req_set][1]`PA_RANGE;
-                $display("2");
+                $display("2 %h", req_va);
 
             end else if(entries[req_set][2]`TAG_RANGE == req_tag && entries[req_set][2]`PCID_RANGE == req_pcid) begin
                 plru[req_set] = new_plru(plru[req_set], 7'b0001011, 7'b0000010);
                 req_ta[SADDR-1:SPAGE] <= entries[req_set][2]`PA_RANGE;
-                $display("3");
+                $display("3 %h", req_va);
             end else if(entries[req_set][3]`TAG_RANGE == req_tag && entries[req_set][3]`PCID_RANGE == req_pcid) begin
                 plru[req_set] = new_plru(plru[req_set], 7'b0010011, 7'b0010010);
                 req_ta[SADDR-1:SPAGE] <= entries[req_set][3]`PA_RANGE;
-                $display("4");
+                $display("4 %h", req_va);
             end else if(entries[req_set][4]`TAG_RANGE == req_tag && entries[req_set][4]`PCID_RANGE == req_pcid) begin
                 plru[req_set] = new_plru(plru[req_set], 7'b0100101, 7'b0000001);
                 req_ta[SADDR-1:SPAGE] <= entries[req_set][4]`PA_RANGE;
-                $display("5");
+                $display("5 %h", req_va);
             end else if(entries[req_set][5]`TAG_RANGE == req_tag && entries[req_set][5]`PCID_RANGE == req_pcid) begin
                 plru[req_set] = new_plru(plru[req_set], 7'b0100101, 7'b0100001);
                 req_ta[SADDR-1:SPAGE] <= entries[req_set][5]`PA_RANGE;
-                $display("6");
+                $display("6 %h", req_va);
             end else if(entries[req_set][6]`TAG_RANGE == req_tag && entries[req_set][6]`PCID_RANGE == req_pcid) begin
                 plru[req_set] = new_plru(plru[req_set], 7'b1000101, 7'b0000101);
                 req_ta[SADDR-1:SPAGE] <= entries[req_set][6]`PA_RANGE;
-                $display("7");
+                $display("7 %h", req_va);
             end else if(entries[req_set][7]`TAG_RANGE == req_tag && entries[req_set][7]`PCID_RANGE == req_pcid) begin
                 plru[req_set] = new_plru(plru[req_set], 7'b1000101, 7'b1000101);
                 req_ta[SADDR-1:SPAGE] <= entries[req_set][7]`PA_RANGE;
-                $display("8");
+                $display("8 %h", req_va);
             end else begin
                 miss <= 1'b1;
                 hit <= 1'b0;

@@ -1,55 +1,58 @@
 
 module PMU
 (   input clk,
-    input tlb_hit,
-    input tlb_miss,
-    input tlb_prefetch,
+    input dtlb_hit,
+    input dtlb_miss,
+    // input dtlb_prefetch,
+    input dtlb_insert,
+    input itlb_hit,
+    input itlb_miss,
+    // input itlb_prefetch,
+    input itlb_insert,
     input stlb_hit,
     input stlb_miss,
     input stlb_prefetch,
-    output [63:0] out1,
-    output [63:0] out2,
-    output [63:0] out3
+    input stlb_insert
 );
 
 reg [5:0] prev_state_reg = 0;
 
 reg unsigned [63:0] dTLB_hit      = 0;
 reg unsigned [63:0] dTLB_miss     = 0;
-reg unsigned [63:0] dTLB_prefetch = 0;
+// reg unsigned [63:0] dTLB_prefetch = 0;
+reg unsigned [63:0] dTLB_insert   = 0;
+
+reg unsigned [63:0] iTLB_hit      = 0;
+reg unsigned [63:0] iTLB_miss     = 0;
+// reg unsigned [63:0] iTLB_prefetch = 0;
+reg unsigned [63:0] iTLB_insert   = 0;
+
 reg unsigned [63:0] STLB_hit      = 0;
 reg unsigned [63:0] STLB_miss     = 0;
 reg unsigned [63:0] STLB_prefetch = 0;
+reg unsigned [63:0] STLB_insert   = 0;
 
-assign out1 = dTLB_hit;
-assign out2 = dTLB_miss;
-assign out3 = dTLB_prefetch;
+`define GEN_STAT(trigger_wire, stat_reg)    \
+if (trigger_wire == 1'b1) begin             \
+    stat_reg <= stat_reg + 1'b1;            \
+end                                         \
 
-// dir_bit - direct bit;
-// f_signal - flag signal;
-// s_signal - stat signal;
-`define GEN_STAT(dir_bit, f_signal, s_signal)\
-if (prev_state_reg[dir_bit] == 1'b0 && f_signal == 1'b1)\
-        s_signal <= s_signal + 1'b1;\
-    prev_state_reg[dir_bit] <= f_signal;\
 
 always @(posedge clk) begin
 
-    if (prev_state_reg[0] == 1'b0 && tlb_hit == 1'b1)
-        dTLB_hit <= dTLB_hit + 1'b1;
-    prev_state_reg[0] <= tlb_hit;
+    `GEN_STAT(dtlb_hit,     dTLB_hit)
+    `GEN_STAT(dtlb_miss,    dTLB_miss)
+    `GEN_STAT(dtlb_insert,  dTLB_insert)
 
-    if (prev_state_reg[1] == 1'b0 && tlb_miss == 1'b1)
-        dTLB_miss <= dTLB_miss + 1'b1;
-    prev_state_reg[1] <= tlb_miss;
+    `GEN_STAT(itlb_hit,     iTLB_hit)
+    `GEN_STAT(itlb_miss,    iTLB_miss)
+    `GEN_STAT(itlb_insert,  iTLB_insert)
 
-    if (prev_state_reg[2] == 1'b0 && tlb_prefetch == 1'b1)
-        dTLB_prefetch <= dTLB_prefetch + 1'b1;
-    prev_state_reg[2] <= tlb_prefetch;
+    `GEN_STAT(stlb_hit,     STLB_hit)
+    `GEN_STAT(stlb_miss,    STLB_miss)
+    `GEN_STAT(stlb_insert,  STLB_insert)
 
-    `GEN_STAT(3, stlb_hit, STLB_hit)
-    `GEN_STAT(4, stlb_miss, STLB_miss)
-    `GEN_STAT(5, stlb_prefetch, STLB_prefetch)
+    `GEN_STAT(stlb_prefetch,  STLB_prefetch)
 end
 
 endmodule

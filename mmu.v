@@ -56,14 +56,17 @@ module MMU
             // outputs
             .req_ta(itlb_req_ta), .hit(itlb_hit), .miss(itlb_miss));
 
-    // PMU pmu(clk, dtlb_hit, dtlb_miss, tlb_insert, stlb_hit, stlb_miss, stlb_insert, stat_hit, stat_miss, stat_prefetch);
-
     STLB stlb(// inputs
               .clk(clk),
               .state_bank0(stlb_state), .req_va_bank0(stlb_piping_va[1]), .req_pcid_bank0(stlb_piping_pcid[1]),
               .insert_va_bank0(stlb_piping_va[3]), .insert_pa_bank0(stlb_piping_pa[3]), .insert_pcid_bank0(stlb_piping_pcid[3]),
               //outputs
               .req_ta_bank0(stlb_req_ta), .hit_bank0(stlb_hit), .miss_bank0(stlb_miss));
+
+    PMU pmu(.clk(clk),
+            .dtlb_hit(dtlb_hit), .dtlb_miss(judged_dtlb_miss), .dtlb_insert(dtlb_state`insert_bit),
+            .itlb_hit(itlb_hit), .itlb_miss(itlb_miss), .itlb_insert(itlb_state`insert_bit),
+            .stlb_hit(stlb_hit), .stlb_miss(stlb_miss), .stlb_prefetch(prefetch_stlb), .stlb_insert(stlb_state`insert_bit));
 
 /********************************************************************
                              PIPELINE MACHINE
@@ -97,8 +100,8 @@ module MMU
     prefetch_stlb = 1'b1;
 
     prefetching_stlb_va     = 64'haaaaaaaaaaaaaaa;
-    prefetching_stlb_pcid     = 12'b0;
-    prefetching_stlb_pa   = 64'haaaaaaaaaaaaaaa;
+    prefetching_stlb_pcid   = 12'b0;
+    prefetching_stlb_pa     = 64'haaaaaaaaaaaaaaa;
 
     #2
 
@@ -237,9 +240,11 @@ module MMU
             itlb_pre_pipe_pa    <= incoming_itlb_pa;
             itlb_req_pcid       <= incoming_itlb_pcid;
             //------------------------------------------
-            dtlb_req_va         <= incoming_dtlb_va;
-            dtlb_pre_pipe_pa    <= incoming_dtlb_pa;
-            dtlb_req_pcid       <= incoming_dtlb_pcid;
+            if (~dtlb_itlb_miss_conflict) begin
+                dtlb_req_va         <= incoming_dtlb_va;
+                dtlb_pre_pipe_pa    <= incoming_dtlb_pa;
+                dtlb_req_pcid       <= incoming_dtlb_pcid;
+            end
             //------------------------------------------
             stlb_piping_va[3] <= stlb_piping_va[2];
             stlb_piping_va[2] <= stlb_piping_va[1];
@@ -263,13 +268,19 @@ module MMU
             stlb_piping_pa[3]   <= prefetching_stlb_pa;
             stlb_piping_pcid[3] <= prefetching_stlb_pcid;
             //------------------------------------------
-            itlb_req_va         <= incoming_itlb_va;
-            itlb_pre_pipe_pa    <= incoming_itlb_pa;
-            itlb_req_pcid       <= incoming_itlb_pcid;
-            //------------------------------------------
-            dtlb_req_va         <= incoming_dtlb_va;
-            dtlb_pre_pipe_pa    <= incoming_dtlb_pa;
-            dtlb_req_pcid       <= incoming_dtlb_pcid;
+            if (~dtlb_itlb_miss_conflict) begin
+                if (~dtlb_miss) begin
+                    dtlb_req_va         <= incoming_dtlb_va;
+                    dtlb_pre_pipe_pa    <= incoming_dtlb_pa;
+                    dtlb_req_pcid       <= incoming_dtlb_pcid;
+                end
+
+                if (~itlb_miss) begin
+                    itlb_req_va         <= incoming_itlb_va;
+                    itlb_pre_pipe_pa    <= incoming_itlb_pa;
+                    itlb_req_pcid       <= incoming_itlb_pcid;
+                end
+            end
         end
 
     end
