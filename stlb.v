@@ -2,59 +2,59 @@
 `include "inc/state.v"
 `include "inc/state_machine.v"
 
-`define WAY_CHECK(bank, way, mru_value, plru_reg_n, mask, value)                                            \
-        if(entries[req_set_``bank][way]`VALIDE_BIT                                                              \
+`define WAY_CHECK(bank, way, mru_value, plru_reg_n, mask, value)                                                    \
+        if(entries[req_set_``bank][way]`VALIDE_BIT                                                                  \
             && entries[req_set_``bank][way]`TAG_RANGE == req_tag_``bank                                             \
             && entries[req_set_``bank][way]`PCID_RANGE == req_pcid_``bank)                                          \
-            begin                                                                                           \
-                mru_top_reg[req_set_``bank] <= mru_value;                                                       \
+            begin                                                                                                   \
+                mru_top_reg[req_set_``bank] <= mru_value;                                                           \
                 plru_reg_n[req_set_``bank] <= new_plru(plru_reg_n[req_set_``bank], mask, value);                    \
-                req_ta_``bank[SADDR-1:0] <= {entries[req_set_``bank][way][SADDR-SPAGE-1:0], req_local_addr_``bank};     \
+                req_ta_``bank[SADDR-1:0] <= {entries[req_set_``bank][way][SADDR-SPAGE-1:0], req_local_addr_``bank}; \
         end else
 
-`define TREE_INVERS(bank, plru_reg_n, order)                                                                \
-                    plru_reg_n[insert_set_``bank][0] <= !plru_reg_n[insert_set_``bank][0];                                \
-                    if (!plru_reg_n[insert_set_``bank][0]) begin                                                   \
-                        plru_reg_n[insert_set_``bank][2] <= !plru_reg_n[insert_set_``bank][2];                            \
-                        if (!plru_reg_n[insert_set_``bank][2]) begin                                               \
-                            entries[insert_set_``bank][order*4+3]`VALIDE_BIT <= 1'b1;                              \
-                            entries[insert_set_``bank][order*4+3]`TAG_RANGE  <= insert_tag_``bank ;                       \
-                            entries[insert_set_``bank][order*4+3]`PCID_RANGE <= insert_pcid_``bank;                       \
-                        end else begin                                                                      \
-                            entries[insert_set_``bank][order*4+2]`VALIDE_BIT <= 1'b1;                              \
-                            entries[insert_set_``bank][order*4+2]`TAG_RANGE  <= insert_tag_``bank ;                       \
-                            entries[insert_set_``bank][order*4+2]`PCID_RANGE <= insert_pcid_``bank;                       \
-                        end                                                                                 \
-                    end else begin                                                                          \
-                        plru_reg_n[insert_set_``bank][1] <= !plru_reg_n[insert_set_``bank][1];                            \
-                        if (!plru_reg_n[insert_set_``bank][1]) begin                                               \
-                            entries[insert_set_``bank][order*4+1]`VALIDE_BIT <= 1'b1;                              \
-                            entries[insert_set_``bank][order*4+1]`TAG_RANGE  <= insert_tag_``bank ;                       \
-                            entries[insert_set_``bank][order*4+1]`PCID_RANGE <= insert_pcid_``bank;                       \
-                        end else begin                                                                      \
-                            entries[insert_set_``bank][order*4]`VALIDE_BIT <= 1'b1;                                \
-                            entries[insert_set_``bank][order*4]`TAG_RANGE  <= insert_tag_``bank ;                         \
-                            entries[insert_set_``bank][order*4]`PCID_RANGE <= insert_pcid_``bank;                         \
-                        end                                                                                 \
+`define TREE_INVERS(bank, plru_reg_n, order)                                                                        \
+                    plru_reg_n[insert_set_``bank][0] <= !plru_reg_n[insert_set_``bank][0];                          \
+                    if (!plru_reg_n[insert_set_``bank][0]) begin                                                    \
+                        plru_reg_n[insert_set_``bank][2] <= !plru_reg_n[insert_set_``bank][2];                      \
+                        if (!plru_reg_n[insert_set_``bank][2]) begin                                                \
+                            entries[insert_set_``bank][order*4+3]`VALIDE_BIT <= 1'b1;                               \
+                            entries[insert_set_``bank][order*4+3]`TAG_RANGE  <= insert_tag_``bank ;                 \
+                            entries[insert_set_``bank][order*4+3]`PCID_RANGE <= insert_pcid_``bank;                 \
+                        end else begin                                                                              \
+                            entries[insert_set_``bank][order*4+2]`VALIDE_BIT <= 1'b1;                               \
+                            entries[insert_set_``bank][order*4+2]`TAG_RANGE  <= insert_tag_``bank ;                 \
+                            entries[insert_set_``bank][order*4+2]`PCID_RANGE <= insert_pcid_``bank;                 \
+                        end                                                                                         \
+                    end else begin                                                                                  \
+                        plru_reg_n[insert_set_``bank][1] <= !plru_reg_n[insert_set_``bank][1];                      \
+                        if (!plru_reg_n[insert_set_``bank][1]) begin                                                \
+                            entries[insert_set_``bank][order*4+1]`VALIDE_BIT <= 1'b1;                               \
+                            entries[insert_set_``bank][order*4+1]`TAG_RANGE  <= insert_tag_``bank ;                 \
+                            entries[insert_set_``bank][order*4+1]`PCID_RANGE <= insert_pcid_``bank;                 \
+                        end else begin                                                                              \
+                            entries[insert_set_``bank][order*4]`VALIDE_BIT <= 1'b1;                                 \
+                            entries[insert_set_``bank][order*4]`TAG_RANGE  <= insert_tag_``bank ;                   \
+                            entries[insert_set_``bank][order*4]`PCID_RANGE <= insert_pcid_``bank;                   \
+                        end                                                                                         \
                     end
 
-`define PORTS_INIT(bank)               \
-    input [`STATE_RANGE] state_``bank, \
-    input [SADDR-1:0] req_va_``bank,       \
-    input [SPCID-1:0] req_pcid_``bank,     \
-    input [SADDR-1:0] insert_va_``bank,       \
-    input [SADDR-1:0] insert_pa_``bank,       \
-    input [SPCID-1:0] insert_pcid_``bank,     \
-    output reg [SADDR-1:0] req_ta_``bank,  \
-    output reg hit_``bank,             \
+`define PORTS_INIT(bank)                    \
+    input [`STATE_RANGE] state_``bank,      \
+    input [SADDR-1:0] req_va_``bank,        \
+    input [SPCID-1:0] req_pcid_``bank,      \
+    input [SADDR-1:0] insert_va_``bank,     \
+    input [SADDR-1:0] insert_pa_``bank,     \
+    input [SPCID-1:0] insert_pcid_``bank,   \
+    output reg [SADDR-1:0] req_ta_``bank,   \
+    output reg hit_``bank,                  \
     output reg miss_``bank
 
-`define SECTION_INIT(bank)                                                                                  \
-wire [SPAGE-1:0]                    req_local_addr_``bank      = req_va_``bank[SPAGE-1:0];                  \
-wire [$clog2(NSET)-1:0]             req_set_``bank             = req_va_``bank[SPAGE+$clog2(NSET)-1:SPAGE]; \
-wire [SADDR-1-SPAGE-$clog2(NSET):0] req_tag_``bank             = req_va_``bank[SADDR-1:SPAGE+$clog2(NSET)]; \
-/*wire [SPAGE-1:0]                    insert_local_addr_``bank      = req_va_``bank[SPAGE-1:0];*/                  \
-wire [$clog2(NSET)-1:0]             insert_set_``bank             = insert_va_``bank[SPAGE+$clog2(NSET)-1:SPAGE]; \
+`define SECTION_INIT(bank)                                                                                          \
+wire [SPAGE-1:0]                    req_local_addr_``bank      = req_va_``bank[SPAGE-1:0];                          \
+wire [$clog2(NSET)-1:0]             req_set_``bank             = req_va_``bank[SPAGE+$clog2(NSET)-1:SPAGE];         \
+wire [SADDR-1-SPAGE-$clog2(NSET):0] req_tag_``bank             = req_va_``bank[SADDR-1:SPAGE+$clog2(NSET)];         \
+/*wire [SPAGE-1:0]                    insert_local_addr_``bank      = req_va_``bank[SPAGE-1:0];*/                   \
+wire [$clog2(NSET)-1:0]             insert_set_``bank             = insert_va_``bank[SPAGE+$clog2(NSET)-1:SPAGE];   \
 wire [SADDR-1-SPAGE-$clog2(NSET):0] insert_tag_``bank             = insert_va_``bank[SADDR-1:SPAGE+$clog2(NSET)];
 
 module STLB

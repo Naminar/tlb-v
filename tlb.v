@@ -12,8 +12,8 @@ module TLB
 (
     input clk,
     input [`STATE_RANGE] state,
-    // input shutdown,                      //   clear tlb
-    // input insert,                        //   forcibly insert PTE
+    // input shutdown,              //   clear tlb
+    // input insert,                //   forcibly insert PTE
     input  [SADDR-1:0] req_va,      // virtual address
     input  [SPCID-1:0] req_pcid,    // process-context identifier
     input  [SADDR-1:0] insert_va,   // virtual address

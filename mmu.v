@@ -6,15 +6,35 @@ module MMU
     parameter SPCID=12
 )
 (
-    input clk,
-    input shutdown,
-    input ex_tlb_insert,
-    input ex_stlb_insert,
-    input validate,
-    input [63:0] va,
-    input [63:0] ex_pa,
-    input [11:0] pcid,
-    output reg [63:0] ta
+    input clk
+    // input [SADDR-1:0] incoming_dtlb_va,
+    // input [SADDR-1:0] incoming_dtlb_pa,
+    // input [SPCID-1:0] incoming_dtlb_pcid,
+
+    // input [SADDR-1:0] incoming_itlb_va,
+    // input [SADDR-1:0] incoming_itlb_pa,
+    // input [SPCID-1:0] incoming_itlb_pcid,
+
+    // input [SADDR-1:0] prefetching_stlb_va,
+    // input [SADDR-1:0] prefetching_stlb_pa,
+    // input [SPCID-1:0] prefetching_stlb_pcid,
+
+    // input prefetch_stlb,
+    // input dtlb_req,
+    // input itlb_req,
+
+    // output out_dtlb_hit, 
+    // output out_dtlb_miss,
+    // output out_dtlb_insert,
+    // output out_itlb_hit, 
+    // output out_itlb_miss,
+    // output out_itlb_insert,
+    // output out_stlb_hit, 
+    // output out_stlb_miss,
+    // output out_stlb_insert,
+    // output out_stlb_prefetch
+    // input in_shutdown,
+    // input in_validate
 );
 
     wire dtlb_hit,  itlb_hit,  stlb_hit,
@@ -34,12 +54,12 @@ module MMU
     reg     [SADDR-1:0] dtlb_req_va     = {SADDR{1'b0}};
     reg     [SPCID-1:0] dtlb_req_pcid   = {SADDR{1'b0}};
     wire    [SADDR-1:0] dtlb_req_ta;
-    reg     [`STATE_RANGE] dtlb_state   = {{5{1'b0}}, 1'b0};
+    reg     [`STATE_RANGE] dtlb_state   = {6{1'b0}};
 
     reg     [SADDR-1:0] itlb_req_va     = {SADDR{1'b0}};
     reg     [SPCID-1:0] itlb_req_pcid   = {SADDR{1'b0}};
     wire    [SADDR-1:0] itlb_req_ta;
-    reg     [`STATE_RANGE] itlb_state   = {{6{1'b0}}};
+    reg     [`STATE_RANGE] itlb_state   = {6{1'b0}};
 
     wire  [SADDR-1:0] stlb_req_ta;
     reg [`STATE_RANGE] stlb_state = {{5{1'b0}}, 1'b0};
@@ -258,7 +278,7 @@ module MMU
                 end
 
                 if (stlb_hit) begin
-                    ta <= dtlb_req_ta;
+                    // ta <= dtlb_req_ta;
 
                     if (piping_marker[1]) begin
                         itlb_state`insert_bit  <= 1'b1;
@@ -267,7 +287,6 @@ module MMU
                     end
                 end
 
-                // TODO: trigger dtlb and itlb insertions
                 if (stlb_state`miss_bit == 1'b1) begin
                     stlb_state`insert_bit <= 1'b1;
 
