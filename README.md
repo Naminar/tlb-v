@@ -33,3 +33,64 @@ PMU (performance management unit): provides general statistical collection capab
 
 ## PCID feature
 This set contains with PCID (process context identifiers) feature for PTE is used by Intel to improve performance of paging structure.
+
+<p align="center">
+	<img src="README/gif/PLRU.gif" 
+		width="45%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/PLRU4.gif" 
+		width="45%"		
+		style="background-color: transparent;"
+	/>
+<p>
+
+<p align="center">
+	<img src="README/gif/inclusion.gif" 
+		width="45%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/scheme.gif" 
+		width="45%"		
+		style="background-color: transparent;"
+	/>
+<p>
+
+<p align="center">
+	<img src="README/gif/exemples/ex1.gif" 
+		width="45%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex2.gif" 
+		width="45%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex3.gif" 
+		width="45%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex4.gif" 
+		width="45%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex5.gif" 
+		width="45%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex6.gif" 
+		width="45%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex7.gif" 
+		width="45%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex8.gif" 
+		width="45%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex9.gif" 
+		width="45%"		
+		style="background-color: transparent;"
+	/>
+<p>
