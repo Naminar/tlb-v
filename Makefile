@@ -6,11 +6,12 @@ FOLDER=build
 
 cmp:
 	if test -d $(FOLDER); then echo ; else mkdir $(FOLDER); fi
-	iverilog -o $(FOLDER)/$(TLB) $(TLB)_tb.v stlb.v $(TLB).v  $(WAY).v $(PMU).v mmu.v
+	iverilog -o $(FOLDER)/$(TLB) $(TLB)_tb.v stlb.v $(TLB).v $(PMU).v mmu.v
 	./$(FOLDER)/$(TLB)
+	mv $(TLB)_tb.vcd $(FOLDER)/
 
 validate:
-	 verilator --lint-only tlb.v stlb.v mmu.v pmu.v
+	 verilator --lint-only tlb.v stlb.v mmu.v pmu.v --top-module MMU
 
 d:
 	iverilog stlb.v way.v -E -o debug.v
