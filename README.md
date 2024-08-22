@@ -34,6 +34,10 @@ PMU (performance management unit): provides general statistical collection capab
 ## PCID feature
 This set contains with PCID (process context identifiers) feature for PTE is used by Intel to improve performance of paging structure.
 
+## Implementation principles
+
+### PLRU and ${(MRU+1)}_{\\%3}$ $PLRU_4$
+
 <p align="center">
 	<img src="README/gif/PLRU.gif" 
 		width="100%"		
@@ -45,16 +49,25 @@ This set contains with PCID (process context identifiers) feature for PTE is use
 	/>
 <p>
 
+### Inclusion policies
+
 <p align="center">
 	<img src="README/gif/inclusion.gif" 
 		width="100%"		
 		style="background-color: transparent;"
 	/>
+<p>
+
+### Based levels principle
+
+<p align="center">
 	<img src="README/gif/scheme.gif" 
 		width="100%"		
 		style="background-color: transparent;"
 	/>
 <p>
+
+### Pipeline access scheme
 
 <p align="center">
 	<img src="README/gif/exemples/ex1.gif" 
