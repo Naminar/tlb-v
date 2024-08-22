@@ -277,24 +277,24 @@ module MMU
                 dtlb_req_pcid       <= incoming_dtlb_pcid;
             end
 
-            if (stlb_hit) begin
-                stlb_piping_va[3] <= stlb_piping_va[1];
+            // if (stlb_hit) begin
+            //     stlb_piping_va[3] <= stlb_piping_va[1];
+            //     //------------------------------------------
+            //     stlb_piping_pa[3] <= stlb_piping_pa[1];
+            //     //------------------------------------------
+            //     stlb_piping_pcid[3] <= stlb_piping_pcid[1];
+            // end
+            // else begin
                 //------------------------------------------
-                stlb_piping_pa[3] <= stlb_piping_pa[1];
-                //------------------------------------------
-                stlb_piping_pcid[3] <= stlb_piping_pcid[1];
-            end
-            else begin
-                //------------------------------------------
-                stlb_piping_va[3] <= stlb_piping_va[2];
-                stlb_piping_va[2] <= stlb_piping_va[1];
-                //------------------------------------------
-                stlb_piping_pa[3] <= stlb_piping_pa[2];
-                stlb_piping_pa[2] <= stlb_piping_pa[1];
-                //------------------------------------------
-                stlb_piping_pcid[3] <= stlb_piping_pcid[2];
-                stlb_piping_pcid[2] <= stlb_piping_pcid[1];
-            end
+            stlb_piping_va[3] <= stlb_piping_va[2];
+            stlb_piping_va[2] <= stlb_piping_va[1];
+            //------------------------------------------
+            stlb_piping_pa[3] <= stlb_piping_pa[2];
+            stlb_piping_pa[2] <= stlb_piping_pa[1];
+            //------------------------------------------
+            stlb_piping_pcid[3] <= stlb_piping_pcid[2];
+            stlb_piping_pcid[2] <= stlb_piping_pcid[1];
+            // end
             // stlb_piping_ta[3] <= stlb_piping_ta[2];
             // stlb_piping_ta[2] <= stlb_piping_ta[1];
             // stlb_piping_ta[1] <= stlb_piping_ta[0];
