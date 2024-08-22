@@ -23,13 +23,13 @@ module MMU
     // input dtlb_req,
     // input itlb_req,
 
-    // output out_dtlb_hit, 
+    // output out_dtlb_hit,
     // output out_dtlb_miss,
     // output out_dtlb_insert,
-    // output out_itlb_hit, 
+    // output out_itlb_hit,
     // output out_itlb_miss,
     // output out_itlb_insert,
-    // output out_stlb_hit, 
+    // output out_stlb_hit,
     // output out_stlb_miss,
     // output out_stlb_insert,
     // output out_stlb_prefetch
@@ -373,7 +373,6 @@ module MMU
                 end
             end
         end
-
     end
 
 endmodule
