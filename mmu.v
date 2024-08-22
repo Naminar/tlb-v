@@ -229,11 +229,11 @@ module MMU
             if (stlb_hit) begin
                 ta <= dtlb_req_ta;
 
-                if (piping_marker[1]) begin
-                    itlb_state`insert_bit  <= 1'b1;
-                end else begin
-                    dtlb_state`insert_bit  <= 1'b1;
-                end
+                // if (piping_marker[1]) begin
+                //     itlb_state`insert_bit  <= 1'b1;
+                // end else begin
+                //     dtlb_state`insert_bit  <= 1'b1;
+                // end
             end
 
             // TODO: trigger dtlb and itlb insertions
