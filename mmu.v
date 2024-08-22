@@ -78,68 +78,92 @@ module MMU
     reg [3:1] piping_marker;                     // iTLB or dTLB info
 
     reg [SADDR-1:0] incoming_dtlb_va;
-    reg [SADDR-1:0] incoming_dtlb_pa;
-    reg [SPCID-1:0] incoming_dtlb_pcid;
+    wire [SADDR-1:0] incoming_dtlb_pa = incoming_dtlb_va;
+    reg [SPCID-1:0] incoming_dtlb_pcid = 0;
 
     reg [SADDR-1:0] incoming_itlb_va;
-    reg [SADDR-1:0] incoming_itlb_pa;
-    reg [SPCID-1:0] incoming_itlb_pcid;
+    wire [SADDR-1:0] incoming_itlb_pa = incoming_itlb_va;
+    wire [SPCID-1:0] incoming_itlb_pcid = 0;
 
     reg [SADDR-1:0] prefetching_stlb_va;
-    reg [SADDR-1:0] prefetching_stlb_pa;
-    reg [SPCID-1:0] prefetching_stlb_pcid;
+    wire [SADDR-1:0] prefetching_stlb_pa = prefetching_stlb_va;
+    reg [SPCID-1:0] prefetching_stlb_pcid = 0;
 
     reg prefetch_stlb;
 
     wire [SADDR-1:0] itlb_ta = (dtlb_hit)? dtlb_req_ta: {SADDR{1'bx}};
     wire [SADDR-1:0] dtlb_ta = (itlb_hit)? itlb_req_ta: {SADDR{1'bx}};
 
+    reg dtlb_req;
+    reg itlb_req;
 
 /* verilator lint_off STMTDLY */
     initial begin
-    prefetch_stlb = 1'b1;
-
-    prefetching_stlb_va     = 64'haaaaaaaaaaaaaaa;
-    prefetching_stlb_pcid   = 12'b0;
-    prefetching_stlb_pa     = 64'haaaaaaaaaaaaaaa;
-
-    #2
 
     incoming_dtlb_va = 64'h0;
-    incoming_dtlb_pcid = 12'b0;
-    incoming_dtlb_pa = 64'h0;
-
     incoming_itlb_va = 64'h0;
-    incoming_itlb_pcid = 12'b0;
-    incoming_itlb_pa = 64'h0;
+    dtlb_req = 1;
+    itlb_req = 1;
+
+    prefetch_stlb = 1'b1;
+    prefetching_stlb_va = 64'hd1ffffffffffffff;
+
+    #2
+    dtlb_req = 0;
+    itlb_req = 0;
+    prefetching_stlb_va = 64'he1ffffffffffffff;
 
     #2
     prefetch_stlb = 1'b0;
-
-    incoming_dtlb_va = 64'hfffffffffffffff1;
-    incoming_dtlb_pcid = 12'b0;
-    incoming_dtlb_pa = 64'hfffffffffffffff1;
-
-    incoming_itlb_va = 64'haabbfffffffffff1;
-    incoming_itlb_pcid = 12'b0;
-    incoming_itlb_pa = 64'haabbfffffffffff1;
+    incoming_dtlb_va = 64'hd1ffffffffffffff;
+    incoming_itlb_va = 64'he1ffffffffffffff;
+    dtlb_req = 1;
+    itlb_req = 1;
 
     #2
-    incoming_itlb_va = 64'haabbccfffffffff1;
-    incoming_itlb_pcid = 12'b0;
-    incoming_itlb_pa = 64'haabbccfffffffff1;
-    #4
-    incoming_dtlb_va =  64'h0;
-    incoming_dtlb_pcid = 12'b0;
-    incoming_dtlb_pa = 64'h0;
-    #6
-    incoming_dtlb_va = 64'hfffffffffffffff1;
-    incoming_dtlb_pcid = 12'b0;
-    incoming_dtlb_pa = 64'hfffffffffffffff1;
-    #4
-    incoming_dtlb_va =  64'h1;
-    incoming_dtlb_pcid = 12'b0;
-    incoming_dtlb_pa = 64'h1;
+    dtlb_req = 0;
+    itlb_req = 0;
+
+    #4 // double insert from L2 to L1
+
+    #2
+    incoming_dtlb_va = 64'hd1ffffffffffffff;
+    incoming_itlb_va = 64'he1ffffffffffffff;
+    dtlb_req = 1;
+    itlb_req = 1;
+
+    #2
+    dtlb_req = 0;
+    itlb_req = 0;
+
+    #2
+    incoming_dtlb_va = 64'hd1ffffffffffffff;
+    incoming_itlb_va = 64'he1ffffffffffffff;
+    dtlb_req = 1;
+    itlb_req = 1;
+
+    #2
+    incoming_dtlb_va = 64'hd2ffffffffffffff;
+    incoming_itlb_va = 64'he2ffffffffffffff;
+
+    #2
+    dtlb_req = 0;
+    itlb_req = 0;
+
+    #4 // double insert to L1, L2
+
+    #2
+    incoming_itlb_va = 64'he2ffffffffffffff;
+    itlb_req = 1;
+
+    #2
+    incoming_dtlb_va = 64'hd2ffffffffffffff;
+    itlb_req = 0;
+    dtlb_req = 1;
+
+    #2
+    dtlb_req = 0;
+    itlb_req = 0;
     end
 /* verilator lint_off STMTDLY */
 
@@ -154,13 +178,14 @@ module MMU
     always @(negedge clk) begin
 
         // -------------- iTLB & dTLB STATE PIPELINE --------------
-        if (dtlb_req_va != incoming_dtlb_va || dtlb_req_pcid != incoming_dtlb_pcid || dtlb_itlb_miss_conflict || stop_dtlb_miss) begin
+        $display("dreq - %b, ireq - %b, conf - %b, - prefetch conflict %b", dtlb_req, itlb_req, dtlb_itlb_miss_conflict, stop_dtlb_miss);
+        if (dtlb_req || dtlb_itlb_miss_conflict || stop_dtlb_miss) begin
             dtlb_state`req_bit <= 1'b1;
         end else if (dtlb_hit || dtlb_miss) begin
             dtlb_state`req_bit <= 1'b0;
         end
 
-        if (itlb_req_va != incoming_itlb_va || itlb_req_pcid != incoming_itlb_pcid || stop_itlb_miss) begin
+        if (itlb_req || stop_itlb_miss) begin
             itlb_state`req_bit <= 1'b1;
         end else if (itlb_hit || itlb_miss) begin
             itlb_state`req_bit <= 1'b0;
@@ -203,6 +228,12 @@ module MMU
 
             if (stlb_hit) begin
                 ta <= dtlb_req_ta;
+
+                // if (piping_marker[1]) begin
+                //     itlb_state`insert_bit  <= 1'b1;
+                // end else begin
+                //     dtlb_state`insert_bit  <= 1'b1;
+                // end
             end
 
             // TODO: trigger dtlb and itlb insertions
@@ -245,6 +276,15 @@ module MMU
                 dtlb_pre_pipe_pa    <= incoming_dtlb_pa;
                 dtlb_req_pcid       <= incoming_dtlb_pcid;
             end
+
+            // if (stlb_hit) begin
+            //     stlb_piping_va[3] <= stlb_piping_va[1];
+            //     //------------------------------------------
+            //     stlb_piping_pa[3] <= stlb_piping_pa[1];
+            //     //------------------------------------------
+            //     stlb_piping_pcid[3] <= stlb_piping_pcid[1];
+            // end
+            // else begin
             //------------------------------------------
             stlb_piping_va[3] <= stlb_piping_va[2];
             stlb_piping_va[2] <= stlb_piping_va[1];
@@ -254,7 +294,7 @@ module MMU
             //------------------------------------------
             stlb_piping_pcid[3] <= stlb_piping_pcid[2];
             stlb_piping_pcid[2] <= stlb_piping_pcid[1];
-
+            // end
             // stlb_piping_ta[3] <= stlb_piping_ta[2];
             // stlb_piping_ta[2] <= stlb_piping_ta[1];
             // stlb_piping_ta[1] <= stlb_piping_ta[0];
