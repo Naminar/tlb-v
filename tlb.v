@@ -101,12 +101,10 @@ always @(posedge clk) begin
                 plru[req_set] = new_plru(plru[req_set], 7'b0001011, 7'b0000000);
                 req_ta[SADDR-1:SPAGE] <= entries[req_set][0]`PA_RANGE;
                 $display("1 %h", req_va);
-
             end else if(entries[req_set][1]`TAG_RANGE == req_tag && entries[req_set][1]`PCID_RANGE == req_pcid) begin
                 plru[req_set] = new_plru(plru[req_set], 7'b0001011, 7'b0001000);
                 req_ta[SADDR-1:SPAGE] <= entries[req_set][1]`PA_RANGE;
                 $display("2 %h", req_va);
-
             end else if(entries[req_set][2]`TAG_RANGE == req_tag && entries[req_set][2]`PCID_RANGE == req_pcid) begin
                 plru[req_set] = new_plru(plru[req_set], 7'b0001011, 7'b0000010);
                 req_ta[SADDR-1:SPAGE] <= entries[req_set][2]`PA_RANGE;
