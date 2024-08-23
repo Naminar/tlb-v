@@ -33,3 +33,77 @@ PMU (performance management unit): provides general statistical collection capab
 
 ## PCID feature
 This set contains with PCID (process context identifiers) feature for PTE is used by Intel to improve performance of paging structure.
+
+## Implementation principles
+
+### PLRU and ${(MRU+1)}_{\\%3}$ $PLRU_4$
+
+<p align="center">
+	<img src="README/gif/PLRU.gif" 
+		width="100%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/PLRU4.gif" 
+		width="100%"		
+		style="background-color: transparent;"
+	/>
+<p>
+
+### Inclusion policies
+
+<p align="center">
+	<img src="README/gif/inclusion.gif" 
+		width="100%"		
+		style="background-color: transparent;"
+	/>
+<p>
+
+### Based levels principle
+
+<p align="center">
+	<img src="README/gif/scheme.gif" 
+		width="100%"		
+		style="background-color: transparent;"
+	/>
+<p>
+
+### Pipeline access scheme
+
+<p align="center">
+	<img src="README/gif/exemples/ex1.gif" 
+		width="100%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex2.gif" 
+		width="100%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex3.gif" 
+		width="100%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex4.gif" 
+		width="100%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex5.gif" 
+		width="100%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex6.gif" 
+		width="100%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex7.gif" 
+		width="100%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex8.gif" 
+		width="100%"		
+		style="background-color: transparent;"
+	/>
+	<img src="README/gif/exemples/ex9.gif" 
+		width="100%"		
+		style="background-color: transparent;"
+	/>
+<p>
